@@ -36,7 +36,7 @@
     $('number').textContent = current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
     $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
-    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map(text => { const p = document.createElement('p'); p.textContent = text; return p; }));
+    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { const p = document.createElement('p'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
     $('number').before(figure);
@@ -63,7 +63,7 @@
     $('key').value = ''; $('feedback').textContent = '';
     $('previous').hidden = current === -1;
     $('next').hidden = current >= unlocked;
-    $('next').textContent = current === -1 ? 'Начать первую главу →' : 'Следующая глава →';
+    $('next').textContent = current === -1 ? 'Перевернуть страницу →' : 'Следующая глава →';
     $('chapter').classList.remove('success');
     const url = config.TELEGRAM_URL;
     const valid = /^https:\/\/t\.me\/[A-Za-z0-9_+/-]+(?:\?[^\s]*)?$/.test(url);
