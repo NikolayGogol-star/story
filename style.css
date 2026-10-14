@@ -26,3 +26,4 @@ label{display:block;font-size:22px;color:var(--wine)}.form-note{font-size:15px;l
 @keyframes softPaperShadow{0%{opacity:0}35%{opacity:.65}55%{opacity:1}85%{opacity:.25}100%{opacity:0}}
 @keyframes pageBedReveal{0%,78%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.book-unfolding .cover-opening,.book-unfolding .turning-leaf,.book-unfolding .turning-leaf:after,.book-unfolding .page-bed{animation:none!important}}
+#book-cinema{position:fixed;inset:0;width:100%;height:100svh;z-index:20;pointer-events:none;background:#30151c;animation:cinemaIn .2s ease both}@keyframes cinemaIn{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){#book-cinema{animation:none}}
