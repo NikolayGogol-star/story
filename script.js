@@ -100,15 +100,59 @@
     const coverImage = new Image();
     coverImage.src = './assets/cover.png';
     await Promise.race([coverImage.decode().catch(() => {}), new Promise(r => setTimeout(r, 1200))]);
+    const rect = $('cover').getBoundingClientRect();
+    const texture = document.createElement('canvas');
+    texture.width = 1024; texture.height = 1536;
+    const ink = texture.getContext('2d');
+    if (coverImage.naturalWidth) ink.drawImage(coverImage,0,0,1024,1536);
+    else { ink.fillStyle='#521b24'; ink.fillRect(0,0,1024,1536); }
+    const factor = 1024/rect.width;
+    function imprint(selector, lines) {
+      const element = document.querySelector(selector);
+      const box = element.getBoundingClientRect(), style = getComputedStyle(element);
+      const size = parseFloat(style.fontSize)*factor;
+      ink.font = `${style.fontStyle} ${style.fontWeight} ${size}px ${style.fontFamily}`;
+      ink.fillStyle = style.color; ink.textAlign='center';
+      const lineHeight = parseFloat(style.lineHeight)*factor || size*1.2;
+      lines.forEach((line,i)=>ink.fillText(line,(box.left-rect.left+box.width/2)*factor,(box.top-rect.top)*factor+size*.84+i*lineHeight));
+    }
+    imprint('.cover-edition',['ЛИЧНЫЙ ЭКЗЕМПЛЯР']);
+    // Wrap the title using the same available width and font as the HTML cover.
+    const titleStyle=getComputedStyle(document.querySelector('.cover-title'));
+    ink.font=`${parseFloat(titleStyle.fontSize)*factor}px ${titleStyle.fontFamily}`;
+    const titleWidth=document.querySelector('.cover-title').getBoundingClientRect().width*factor;
+    let titleLines=['ИСТОРИЯ,'], line='';
+    for(const word of ['КОТОРОЙ','ЕЩЁ','НЕТ']) {
+      const candidate=line?line+' '+word:word;
+      if(line && ink.measureText(candidate).width>titleWidth){titleLines.push(line);line=word;}else line=candidate;
+    }
+    titleLines.push(line); imprint('.cover-title',titleLines);
+    imprint('.cover-subtitle',['История в четырёх главах']);
+    const buttonRect=$('open-book').getBoundingClientRect();
+    ink.fillStyle='#30151c70'; ink.strokeStyle='#b69a62';ink.lineWidth=factor;
+    const bx=(buttonRect.left-rect.left)*factor, by=(buttonRect.top-rect.top)*factor;
+    ink.fillRect(bx,by,buttonRect.width*factor,buttonRect.height*factor);ink.strokeRect(bx,by,buttonRect.width*factor,buttonRect.height*factor);
+    ink.fillStyle='#f0d7a1';ink.font=`${parseFloat(getComputedStyle($('open-book')).fontSize)*factor}px Georgia`;ink.fillText('Открыть книгу   →',bx+buttonRect.width*factor/2,by+buttonRect.height*factor*.62);
     canvas.hidden = false;
     const width = innerWidth, height = innerHeight;
     const ratio = Math.min(devicePixelRatio || 1, 2);
     canvas.width = width * ratio; canvas.height = height * ratio;
     ctx.scale(ratio, ratio);
-    const pw = Math.min(width * .40, 275, height * .31), ph = pw * 1.5;
-    const centerY = height * .5;
+    const targetWidth = Math.min(width * .40, 275, height * .31);
+    let pw = rect.width, ph = rect.height, centerY = rect.top+rect.height/2;
     const ease = x => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
     const sheet = (spine, progress, cover = false, offset = 0) => {
+      if(cover) {
+        const angle=Math.PI*progress;
+        ctx.save();ctx.translate(spine,centerY-ph/2);
+        ctx.transform(Math.cos(angle),-Math.sin(angle)*.38,0,1,0,0);
+        if(progress<.5) ctx.drawImage(texture,0,0,pw,ph);
+        else {
+          ctx.fillStyle='#521b24';ctx.fillRect(0,0,pw,ph);
+          ctx.strokeStyle='#b69a6260';ctx.lineWidth=1;ctx.strokeRect(10,10,pw-20,ph-20);
+        }
+        ctx.restore();return;
+      }
       const points = []; let x = 0, z = 0;
       const bend = Math.sin(Math.PI * progress) * (cover ? 0 : .7);
       for (let i = 0; i <= 64; i++) {
@@ -131,41 +175,37 @@
         ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(b.x,b.y+ph);ctx.lineTo(a.x,a.y+ph);ctx.closePath();ctx.fill();
         // Overlap strip edges to avoid hairline seams during the bend.
         ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.7;ctx.stroke();
-        if(cover && coverImage.complete && coverImage.naturalWidth) {
-          ctx.save();ctx.translate(a.x,a.y);ctx.scale(b.x >= a.x ? 1 : -1,1);
-          ctx.drawImage(coverImage, i*coverImage.naturalWidth/64, 0, coverImage.naturalWidth/64+.5, coverImage.naturalHeight, 0, 0, Math.abs(b.x-a.x)+.5, ph);ctx.restore();
-        }
+
       }
       ctx.strokeStyle=cover?'#b69a6280':'#a8937240';ctx.lineWidth=.7;
       ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
       ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y+ph):ctx.moveTo(p.x,p.y+ph));ctx.stroke();
-      if(cover && progress<.3) {
-        ctx.save();const scale=Math.cos(Math.PI*progress);ctx.translate(spine,centerY-ph/2);ctx.scale(scale,1);
-        ctx.translate(pw*.035,0);
-        ctx.fillStyle='#e4cea0';ctx.textAlign='center';ctx.font=`${pw*.075}px Georgia`;
-        ['ИСТОРИЯ,','КОТОРОЙ ЕЩЁ','НЕТ'].forEach((line,i)=>ctx.fillText(line,pw/2,ph*.245+i*pw*.095));
-        ctx.font=`italic ${pw*.045}px Georgia`;ctx.fillText('История в четырёх главах',pw/2,ph*.335);ctx.restore();
-      }
+
     };
     await new Promise(resolve => {
       let origin;
       function frame(now) {
         if(origin === undefined) origin=now;
-        const t=(now-origin)/1000;
+        const elapsed=(now-origin)/1000;
+        const t=Math.max(0,elapsed-.65);
+        const framing=ease(elapsed/.65);
+        pw=rect.width+(targetWidth-rect.width)*framing; ph=pw*1.5;
+        centerY=rect.top+rect.height/2+(height*.5-rect.top-rect.height/2)*framing;
         ctx.clearRect(0,0,width,height);
         ctx.fillStyle='#30151c';ctx.fillRect(0,0,width,height);
-        const spine=width/2-pw/2*(1-ease(t/1.6));
+        const framedSpine=width/2-pw/2*(1-ease(t/1.6));
+        const spine=rect.left+(framedSpine-rect.left)*framing;
         ctx.save();ctx.shadowColor='#10070b80';ctx.shadowBlur=28;ctx.shadowOffsetY=14;
         ctx.fillStyle='#521b24';
-        const left=pw*ease(t/1.4);
+        const left=pw*Math.max(0,-Math.cos(Math.PI*ease(t/1.5)));
         ctx.fillRect(spine-left-7,centerY-ph/2-7,left+pw+14,ph+14);ctx.restore();
         // Page block with fine, closely spaced paper edges.
         for(let i=6;i>=0;i--){ctx.fillStyle=i%2?'#c9b896':'#e8dbc1';ctx.fillRect(spine,centerY-ph/2+i,pw+2,ph);}
-        if(t>1.2)sheet(spine,1,false);
+        if(t>2.9)sheet(spine,1,false);
         sheet(spine,0,false);
         const pages=Array.from({length:7},(_,i)=>({p:ease((t-.8-i*.18)/2.1),i}));
         pages.sort((a,b)=>Math.sin(a.p*Math.PI)-Math.sin(b.p*Math.PI));
-        for(const page of pages) if(page.p>0 && page.p<1) sheet(spine,page.p,false,page.i*.18);
+        for(const page of pages) if(page.p>0) sheet(spine,page.p,false,page.i*.18);
         if(t<1.5)sheet(spine,ease(t/1.5),true);
         const shadow=ctx.createLinearGradient(spine-18,0,spine+18,0);shadow.addColorStop(0,'#39272000');shadow.addColorStop(.5,'#39272040');shadow.addColorStop(1,'#39272000');ctx.fillStyle=shadow;ctx.fillRect(spine-18,centerY-ph/2,36,ph);
         if(t>4.25){ctx.fillStyle=`rgba(48,21,28,${ease((t-4.25)/.55)})`;ctx.fillRect(0,0,width,height);}
@@ -190,7 +230,7 @@
   $('open-book').addEventListener('click', async () => {
     if (busy) return;
     busy = true; opened = true; save();
-    if (!reducedMotion()) await animateBook();
+    try { if (!reducedMotion()) await animateBook(); } finally { $('book-cinema').hidden = true; }
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
     current = unlocked; render(true); busy = false;
   });
