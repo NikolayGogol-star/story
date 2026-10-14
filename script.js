@@ -97,12 +97,15 @@
     const canvas = $('book-cinema');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const coverImage = new Image();
+    coverImage.src = './assets/cover.png';
+    await Promise.race([coverImage.decode().catch(() => {}), new Promise(r => setTimeout(r, 1200))]);
     canvas.hidden = false;
     const width = innerWidth, height = innerHeight;
     const ratio = Math.min(devicePixelRatio || 1, 2);
     canvas.width = width * ratio; canvas.height = height * ratio;
     ctx.scale(ratio, ratio);
-    const pw = Math.min(width * .40, 275, height * .33), ph = pw * 1.42;
+    const pw = Math.min(width * .40, 275, height * .31), ph = pw * 1.5;
     const centerY = height * .5;
     const ease = x => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
     const sheet = (spine, progress, cover = false, offset = 0) => {
@@ -128,16 +131,20 @@
         ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(b.x,b.y+ph);ctx.lineTo(a.x,a.y+ph);ctx.closePath();ctx.fill();
         // Overlap strip edges to avoid hairline seams during the bend.
         ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.7;ctx.stroke();
+        if(cover && coverImage.complete && coverImage.naturalWidth) {
+          ctx.save();ctx.translate(a.x,a.y);ctx.scale(b.x >= a.x ? 1 : -1,1);
+          ctx.drawImage(coverImage, i*coverImage.naturalWidth/64, 0, coverImage.naturalWidth/64+.5, coverImage.naturalHeight, 0, 0, Math.abs(b.x-a.x)+.5, ph);ctx.restore();
+        }
       }
       ctx.strokeStyle=cover?'#b69a6280':'#a8937240';ctx.lineWidth=.7;
       ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
       ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y+ph):ctx.moveTo(p.x,p.y+ph));ctx.stroke();
       if(cover && progress<.3) {
         ctx.save();const scale=Math.cos(Math.PI*progress);ctx.translate(spine,centerY-ph/2);ctx.scale(scale,1);
-        ctx.strokeStyle='#b69a62';ctx.lineWidth=1;ctx.strokeRect(13,13,pw-26,ph-26);
+        ctx.translate(pw*.035,0);
         ctx.fillStyle='#e4cea0';ctx.textAlign='center';ctx.font=`${pw*.075}px Georgia`;
-        ['ИСТОРИЯ,','КОТОРОЙ ЕЩЁ','НЕТ'].forEach((line,i)=>ctx.fillText(line,pw/2,ph*.30+i*pw*.10));
-        ctx.font=`italic ${pw*.045}px Georgia`;ctx.fillText('История в четырёх главах',pw/2,ph*.57);ctx.restore();
+        ['ИСТОРИЯ,','КОТОРОЙ ЕЩЁ','НЕТ'].forEach((line,i)=>ctx.fillText(line,pw/2,ph*.245+i*pw*.095));
+        ctx.font=`italic ${pw*.045}px Georgia`;ctx.fillText('История в четырёх главах',pw/2,ph*.335);ctx.restore();
       }
     };
     await new Promise(resolve => {
