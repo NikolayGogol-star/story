@@ -104,7 +104,22 @@
     busy = false;
   });
   $('previous').addEventListener('click', () => { if (!busy && current > -1) { current--; render(true); } });
-  $('next').addEventListener('click', () => { if (!busy && current < unlocked) { if(current === -1){prologueRead=true;save();} current++; render(true); } });
+  $('next').addEventListener('click', async () => {
+    if (busy || current >= unlocked) return;
+    if (current === -1) {
+      busy = true;
+      const page = $('chapter');
+      page.classList.add('prologue-turn');
+      await pause(800);
+      prologueRead = true; save(); current = 0;
+      page.classList.remove('prologue-turn');
+      render(true);
+      page.classList.add('chapter-arrival');
+      await pause(500);
+      page.classList.remove('chapter-arrival');
+      busy = false;
+    } else { current++; render(true); }
+  });
   $('telegram').addEventListener('click', event => { if ($('telegram').getAttribute('aria-disabled') === 'true') event.preventDefault(); });
   async function animateBook() {
     const canvas = $('book-cinema');
