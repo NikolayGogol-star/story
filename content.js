@@ -83,7 +83,7 @@ window.STORY_CONTENT = [
     ],
     "illustration": "./assets/chapter-2.png",
     "illustrationAlt": "Чайник на подогреве, чашка, свечи и пустая стеклянная ваза",
-    "waitingTitle": "Глава III пока недоступна",
+    "waitingTitle": "Следующая глава пока недоступна",
     "waitingText": "Ключ ещё не найден.\nНо он уже на пути к тебе."
   },
   {

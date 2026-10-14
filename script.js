@@ -10,6 +10,8 @@
   let current = 0;
   let opened = false;
   let prologueRead = false;
+  let lastPage = null;
+  let restoredCurrent = null;
   let busy = false;
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : ms));
@@ -19,14 +21,17 @@
       unlocked = saved.unlocked;
       opened = saved.opened === true || saved.unlocked > 0;
       prologueRead = saved.prologueRead === true || (saved.prologueRead === undefined && opened);
+      if(Number.isInteger(saved.current) && saved.current >= -1 && saved.current <= unlocked) restoredCurrent = saved.current;
+      if(saved.lastPage === 'cover' || (Number.isInteger(saved.lastPage) && saved.lastPage >= -1 && saved.lastPage <= unlocked)) lastPage = saved.lastPage;
       complete = saved.complete === true && unlocked === content.length - 1;
     }
   } catch (_) { /* Reading still works when storage is unavailable. */ }
-  current = opened && !prologueRead ? -1 : unlocked;
+  current = restoredCurrent !== null ? restoredCurrent : typeof lastPage === 'number' ? lastPage : opened && !prologueRead ? -1 : unlocked;
   function save() {
-    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead })); } catch (_) { /* Keep in-memory progress. */ }
+    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current, lastPage })); } catch (_) { /* Keep in-memory progress. */ }
   }
-  function render(focus = false) {
+  function render(focus = false, persist = true) {
+    if (persist && opened) { lastPage = current; save(); }
     const chapter = current === -1 ? window.STORY_PROLOG : content[current];
     $('title').textContent = chapter.title;
     $('subtitle').textContent = chapter.subtitle || '';
@@ -36,7 +41,7 @@
     $('number').textContent = current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
     $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
-    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { const p = document.createElement('p'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
+    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { const p = document.createElement('p'); if(current === -1 && (chapter.italicParagraphs || []).includes(index)) p.classList.add('author-signature'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
     $('number').before(figure);
@@ -127,7 +132,7 @@
     if (!ctx) return;
     const coverImage = new Image();
     coverImage.src = './assets/cover.png';
-    await Promise.race([coverImage.decode().catch(() => {}), new Promise(r => setTimeout(r, 1200))]);
+    await Promise.race([typeof coverImage.decode === 'function' ? coverImage.decode().catch(() => {}) : new Promise(r => { coverImage.onload=r; coverImage.onerror=r; if(coverImage.complete) r(); }), new Promise(r => setTimeout(r, 1200))]);
     const rect = $('cover').getBoundingClientRect();
     const texture = document.createElement('canvas');
     texture.width = 1024; texture.height = 1536;
@@ -211,8 +216,15 @@
 
     };
     await new Promise(resolve => {
-      let origin;
+      let origin, raf;
+      let finished = false;
+      const finish = () => { if(finished) return; finished=true; clearTimeout(watchdog); cancelAnimationFrame(raf); window.removeEventListener('resize',finish); document.removeEventListener('visibilitychange',onVisibility); resolve(); };
+      const onVisibility = () => { if(document.hidden) finish(); };
+      const watchdog = setTimeout(finish,6500);
+      window.addEventListener('resize',finish,{once:true});
+      document.addEventListener('visibilitychange',onVisibility);
       function frame(now) {
+        if(finished) return;
         if(origin === undefined) origin=now;
         const elapsed=(now-origin)/1000;
         const t=Math.max(0,elapsed-.65);
@@ -237,13 +249,14 @@
         if(t<1.5)sheet(spine,ease(t/1.5),true);
         const shadow=ctx.createLinearGradient(spine-18,0,spine+18,0);shadow.addColorStop(0,'#39272000');shadow.addColorStop(.5,'#39272040');shadow.addColorStop(1,'#39272000');ctx.fillStyle=shadow;ctx.fillRect(spine-18,centerY-ph/2,36,ph);
         if(t>4.25){ctx.fillStyle=`rgba(48,21,28,${ease((t-4.25)/.55)})`;ctx.fillRect(0,0,width,height);}
-        if(t<4.8)requestAnimationFrame(frame);else resolve();
+        if(t<4.8)raf=requestAnimationFrame(frame);else finish();
       }
-      requestAnimationFrame(frame);
+      raf=requestAnimationFrame(frame);
     });
     canvas.hidden=true;
   }
   function showCover() {
+    lastPage = 'cover'; save();
     $('cover-screen').hidden = false;
     $('reading-screen').hidden = true;
     $('cover').classList.remove('cover-opening');
@@ -258,12 +271,13 @@
   $('open-book').addEventListener('click', async () => {
     if (busy) return;
     busy = true; opened = true; save();
-    try { if (!reducedMotion()) await animateBook(); } finally { $('book-cinema').hidden = true; }
+    document.body.classList.add('book-is-opening');
+    try { if (!reducedMotion()) await animateBook(); } catch (_) { /* Always allow reading if drawing is unavailable. */ } finally { $('book-cinema').hidden = true; document.body.classList.remove('book-is-opening'); }
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
-    current = prologueRead ? unlocked : -1; render(true); busy = false;
+    current = prologueRead ? current : -1; render(true); busy = false;
   });
   window.resetAnnaStory = () => { try { localStorage.removeItem(config.STORAGE_KEY); } catch (_) {} location.reload(); };
-  render();
-  if (opened) { $('cover-screen').hidden = true; $('reading-screen').hidden = false; }
+  render(false, false);
+  if (opened && lastPage !== 'cover') { $('cover-screen').hidden = true; $('reading-screen').hidden = false; }
   else showCover();
 })();
