@@ -9,6 +9,7 @@
   let complete = false;
   let current = 0;
   let opened = false;
+  let prologueRead = false;
   let busy = false;
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : ms));
@@ -17,28 +18,36 @@
     if (saved && Number.isInteger(saved.unlocked) && saved.unlocked >= 0 && saved.unlocked < content.length) {
       unlocked = saved.unlocked;
       opened = saved.opened === true || saved.unlocked > 0;
+      prologueRead = saved.prologueRead === true || (saved.prologueRead === undefined && opened);
       complete = saved.complete === true && unlocked === content.length - 1;
     }
   } catch (_) { /* Reading still works when storage is unavailable. */ }
-  current = unlocked;
+  current = opened && !prologueRead ? -1 : unlocked;
   function save() {
-    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened })); } catch (_) { /* Keep in-memory progress. */ }
+    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead })); } catch (_) { /* Keep in-memory progress. */ }
   }
   function render(focus = false) {
-    const chapter = content[current];
+    const chapter = current === -1 ? window.STORY_PROLOG : content[current];
     $('title').textContent = chapter.title;
-    $('number').textContent = `Глава ${numerals[current]}`;
-    $('folio').textContent = numerals[current];
+    $('number').textContent = current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
+    $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
-    $('prose').replaceChildren(...chapter.paragraphs.map(text => { const p = document.createElement('p'); p.textContent = text; return p; }));
+    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map(text => { const p = document.createElement('p'); p.textContent = text; return p; }));
     $('illustration-frame').hidden = !chapter.illustration;
-    $('revelation').hidden = current !== content.length - 1;
+    const figure = $('illustration-frame');
+    if(current === content.length-1) $('prose').after(figure);
+    else $('prose').before(figure);
+    $('waiting').hidden = current !== unlocked || current === content.length-1;
     document.querySelector('.book').classList.toggle('final-chapter', current === content.length - 1);
     $('key-reveal').hidden = true;
     $('key-form').classList.remove('key-departing');
     if (chapter.illustration) { $('illustration').src = chapter.illustration; $('illustration').alt = chapter.illustrationAlt || ''; }
     else $('illustration').removeAttribute('src');
-    $('chapters').replaceChildren(...content.slice(0, unlocked + 1).map((entry, index) => {
+    const prologueButton = document.createElement('button');
+    prologueButton.type='button';prologueButton.textContent='П';prologueButton.setAttribute('aria-label','Пролог');
+    if(current === -1) prologueButton.setAttribute('aria-current','page');
+    prologueButton.addEventListener('click',()=>{if(!busy){current=-1;render(true);}});
+    $('chapters').replaceChildren(prologueButton, ...content.slice(0, unlocked + 1).map((entry, index) => {
       const button = document.createElement('button');
       button.type = 'button'; button.textContent = numerals[index];
       button.setAttribute('aria-label', `Глава ${numerals[index]}: ${entry.title}`);
@@ -49,8 +58,9 @@
     $('key-form').hidden = current !== unlocked || current === content.length - 1;
     $('ending').hidden = current !== content.length - 1;
     $('key').value = ''; $('feedback').textContent = '';
-    $('previous').hidden = current === 0;
+    $('previous').hidden = current === -1;
     $('next').hidden = current >= unlocked;
+    $('next').textContent = current === -1 ? 'Начать первую главу →' : 'Следующая глава →';
     $('chapter').classList.remove('success');
     const url = config.TELEGRAM_URL;
     const valid = /^https:\/\/t\.me\/[A-Za-z0-9_+/-]+(?:\?[^\s]*)?$/.test(url);
@@ -90,8 +100,8 @@
     render(true); $('chapter').classList.add('success');
     busy = false;
   });
-  $('previous').addEventListener('click', () => { if (!busy && current > 0) { current--; render(true); } });
-  $('next').addEventListener('click', () => { if (!busy && current < unlocked) { current++; render(true); } });
+  $('previous').addEventListener('click', () => { if (!busy && current > -1) { current--; render(true); } });
+  $('next').addEventListener('click', () => { if (!busy && current < unlocked) { if(current === -1){prologueRead=true;save();} current++; render(true); } });
   $('telegram').addEventListener('click', event => { if ($('telegram').getAttribute('aria-disabled') === 'true') event.preventDefault(); });
   async function animateBook() {
     const canvas = $('book-cinema');
@@ -232,8 +242,9 @@
     busy = true; opened = true; save();
     try { if (!reducedMotion()) await animateBook(); } finally { $('book-cinema').hidden = true; }
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
-    current = unlocked; render(true); busy = false;
+    current = prologueRead ? unlocked : -1; render(true); busy = false;
   });
+  window.resetAnnaStory = () => { try { localStorage.removeItem(config.STORAGE_KEY); } catch (_) {} location.reload(); };
   render();
   if (opened) { $('cover-screen').hidden = true; $('reading-screen').hidden = false; }
   else showCover();
