@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#30151C">
   <title>История, которой ещё нет</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=20261014-cover2">
   <script defer src="./config.js"></script>
   <script defer src="./content.js"></script>
-  <script defer src="./script.js"></script>
+  <script defer src="./script.js?v=20261014-cover2"></script>
 </head>
 <body>
   <a class="skip" href="#chapter">Перейти к главе</a>
   <section id="cover-screen" class="cover-screen" aria-label="Обложка книги">
     <div class="cover" id="cover">
       <div class="cover-frame" aria-hidden="true"></div>
-      <svg class="cover-flower flower-left" viewBox="0 0 100 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M45 132C62 90 36 65 55 35M48 102C7 93 12 64 34 73C47 78 46 89 48 102M52 82C84 76 88 53 72 57C59 60 55 73 52 82M55 35C26 40 16 14 28 12C44 13 52 27 55 35C53 10 66 2 71 10C75 20 63 32 55 35C75 23 94 26 88 37C77 49 62 43 55 35Z"/><path d="M15 126Q18 109 32 112Q47 116 27 127M75 126Q96 113 88 100"/></g></svg>
-      <svg class="cover-flower flower-right" viewBox="0 0 100 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M45 132C62 90 36 65 55 35M48 102C7 93 12 64 34 73C47 78 46 89 48 102M52 82C84 76 88 53 72 57C59 60 55 73 52 82M55 35C26 40 16 14 28 12C44 13 52 27 55 35C53 10 66 2 71 10C75 20 63 32 55 35C75 23 94 26 88 37C77 49 62 43 55 35Z"/></g></svg>
+      <svg class="cover-flower flower-left" width="86" height="125" viewBox="0 0 100 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M45 132C62 90 36 65 55 35M48 102C7 93 12 64 34 73C47 78 46 89 48 102M52 82C84 76 88 53 72 57C59 60 55 73 52 82M55 35C26 40 16 14 28 12C44 13 52 27 55 35C53 10 66 2 71 10C75 20 63 32 55 35C75 23 94 26 88 37C77 49 62 43 55 35Z"/><path d="M15 126Q18 109 32 112Q47 116 27 127M75 126Q96 113 88 100"/></g></svg>
+      <svg class="cover-flower flower-right" width="86" height="125" viewBox="0 0 100 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M45 132C62 90 36 65 55 35M48 102C7 93 12 64 34 73C47 78 46 89 48 102M52 82C84 76 88 53 72 57C59 60 55 73 52 82M55 35C26 40 16 14 28 12C44 13 52 27 55 35C53 10 66 2 71 10C75 20 63 32 55 35C75 23 94 26 88 37C77 49 62 43 55 35Z"/></g></svg>
       <p class="cover-edition">Личный экземпляр</p>
       <h2 class="cover-title">История,<br>которой ещё нет</h2>
       <p class="cover-subtitle">История в четырёх главах</p>
-      <svg class="cover-emblem" viewBox="0 0 260 180" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M31 67Q81 50 128 76Q173 50 227 67V139Q177 123 128 147Q82 125 31 139ZM128 76V147M39 62V132M219 62V132M48 77Q86 65 115 81M48 88Q86 76 115 92M48 100Q86 88 115 104M143 83Q176 68 210 80M143 94Q176 79 210 91M143 106Q176 91 210 103"/><g transform="translate(137 18) rotate(28)"><circle cx="0" cy="0" r="16"/><circle cx="0" cy="0" r="9"/><path d="M0 16V76H13V65H7V55H0M-4 19H4"/></g><path d="M89 160Q130 178 171 160M112 28Q128 12 144 28M118 29Q128 19 138 29"/></g></svg>
+      <svg class="cover-emblem" width="240" height="180" viewBox="0 0 260 180" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M31 67Q81 50 128 76Q173 50 227 67V139Q177 123 128 147Q82 125 31 139ZM128 76V147M39 62V132M219 62V132M48 77Q86 65 115 81M48 88Q86 76 115 92M48 100Q86 88 115 104M143 83Q176 68 210 80M143 94Q176 79 210 91M143 106Q176 91 210 103"/><g transform="translate(137 18) rotate(28)"><circle cx="0" cy="0" r="16"/><circle cx="0" cy="0" r="9"/><path d="M0 16V76H13V65H7V55H0M-4 19H4"/></g><path d="M89 160Q130 178 171 160M112 28Q128 12 144 28M118 29Q128 19 138 29"/></g></svg>
       <button id="open-book" class="cover-button" type="button">Открыть книгу <span aria-hidden="true">→</span></button>
       <span class="cover-bottom" aria-hidden="true">❦</span>
     </div>
@@ -43,7 +43,7 @@
         <p class="form-note">Впиши слова, которые привели тебя сюда.</p>
         <div class="input-row"><input id="key" name="key" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" aria-describedby="feedback"><button type="submit">Открыть страницу <span aria-hidden="true">→</span></button></div>
       </form>
-      <div id="key-reveal" hidden role="status" class="key-reveal"><svg viewBox="0 0 120 55" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="25" cy="25" r="15"/><circle cx="25" cy="25" r="8"/><path d="M40 25H100V39H90V32H80V25M44 21V29"/></g></svg><span id="key-message">Ключ найден</span></div>
+      <div id="key-reveal" hidden role="status" class="key-reveal"><svg width="130" height="62" viewBox="0 0 120 55" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="25" cy="25" r="15"/><circle cx="25" cy="25" r="8"/><path d="M40 25H100V39H90V32H80V25M44 21V29"/></g></svg><span id="key-message">Ключ найден</span></div>
       <p id="feedback" role="status" aria-live="polite"></p>
       <div id="ending" hidden><a id="telegram" class="author-button">Встретиться с Автором <span aria-hidden="true">↗</span></a><p id="telegram-note" class="form-note"></p></div>
       <div class="page-navigation"><button id="previous" type="button">← Предыдущая глава</button><button id="next" type="button">Следующая глава →</button></div>
