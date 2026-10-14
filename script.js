@@ -97,6 +97,8 @@
     $('cover-screen').hidden = false;
     $('reading-screen').hidden = true;
     $('cover').classList.remove('cover-opening');
+    $('cover-screen').classList.remove('book-unfolding');
+    $('turning-pages').hidden = true;
   }
   $('back-cover').addEventListener('click', () => {
     if (busy) return;
@@ -106,8 +108,10 @@
   $('open-book').addEventListener('click', async () => {
     if (busy) return;
     busy = true; opened = true; save();
+    $('turning-pages').hidden = false;
+    $('cover-screen').classList.add('book-unfolding');
     $('cover').classList.add('cover-opening');
-    await pause(1700);
+    await pause(2400);
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
     current = unlocked; render(true); busy = false;
   });
