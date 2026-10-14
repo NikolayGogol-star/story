@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#30151C">
+  <title>История, которой ещё нет</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./config.js"></script>
+  <script defer src="./content.js"></script>
+  <script defer src="./script.js"></script>
+</head>
+<body>
+  <a class="skip" href="#chapter">Перейти к главе</a>
+  <header class="masthead"><span class="eyebrow">Личный экземпляр · Для Ани</span><h1>История,<br>которой ещё нет</h1><p>Роман в четырёх главах</p></header>
+  <main class="book">
+    <div class="book-top"><span>На полях истории</span><span id="progress" aria-live="polite"></span></div>
+    <nav id="chapters" aria-label="Открытые главы"></nav>
+    <article id="chapter" tabindex="-1">
+      <div class="ornament" aria-hidden="true">❦</div>
+      <p id="number" class="eyebrow"></p>
+      <h2 id="title"></h2>
+      <img id="illustration" hidden alt="">
+      <div id="prose"></div>
+      <div class="divider" aria-hidden="true"><span>❦</span></div>
+      <form id="key-form" novalidate>
+        <label for="key">Ключ к следующей главе</label>
+        <p class="form-note">Впиши слова, которые привели тебя сюда.</p>
+        <div class="input-row"><input id="key" name="key" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" aria-describedby="feedback"><button type="submit">Открыть страницу <span aria-hidden="true">→</span></button></div>
+      </form>
+      <p id="feedback" role="status" aria-live="polite"></p>
+      <div id="ending" hidden><a id="telegram" class="author-button">Встретиться с Автором <span aria-hidden="true">↗</span></a><p id="telegram-note" class="form-note"></p></div>
+      <div class="page-navigation"><button id="previous" type="button">← Предыдущая глава</button><button id="next" type="button">Следующая глава →</button></div>
+    </article>
+    <footer class="book-bottom"><span>История, которой ещё нет</span><span id="folio"></span></footer>
+  </main>
+  <footer class="colophon">Сохрани эту страницу.<br>Некоторые истории хочется перечитать.</footer>
+  <noscript>Чтобы открывать главы, включи JavaScript в браузере.</noscript>
+</body>
+</html>
