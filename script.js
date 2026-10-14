@@ -111,7 +111,7 @@
     $('turning-pages').hidden = false;
     $('cover-screen').classList.add('book-unfolding');
     $('cover').classList.add('cover-opening');
-    await pause(2400);
+    await pause(3400);
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
     current = unlocked; render(true); busy = false;
   });
