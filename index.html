@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#30151C">
   <title>История, которой ещё нет</title>
-  <link rel="stylesheet" href="./style.css?v=20261014-chapters8">
-  <script defer src="./config.js"></script>
-  <script defer src="./content.js"></script>
-  <script defer src="./script.js?v=20261014-chapters8"></script>
+  <link rel="stylesheet" href="./style.css?v=20261014-final9">
+  <script defer src="./config.js?v=20261014-final9"></script>
+  <script defer src="./content.js?v=20261014-final9"></script>
+  <script defer src="./script.js?v=20261014-final9"></script>
 </head>
 <body>
   <a class="skip" href="#chapter">Перейти к главе</a>
@@ -41,10 +41,11 @@
       <div class="ornament" aria-hidden="true">❦</div>
       <p id="number" class="eyebrow"></p>
       <h2 id="title"></h2>
+      <p id="subtitle" class="chapter-subtitle" hidden></p>
       <figure id="illustration-frame" hidden><img id="illustration" alt=""></figure>
       <div id="prose"></div>
       <div class="divider" aria-hidden="true"><span>❦</span></div>
-      <section id="waiting" class="waiting" hidden><h3>Продолжение следует…</h3><p>Некоторые страницы этой истории<br>открываются только в своё время.</p></section>
+      <section id="waiting" class="waiting" hidden><h3 id="waiting-title">Продолжение следует…</h3><p id="waiting-text">Некоторые страницы этой истории<br>открываются только в своё время.</p></section>
       <form id="key-form" novalidate>
         <label for="key">Ключ к следующей главе</label>
         <p class="form-note">Впиши слова, которые привели тебя сюда.</p>

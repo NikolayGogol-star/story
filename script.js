@@ -29,14 +29,17 @@
   function render(focus = false) {
     const chapter = current === -1 ? window.STORY_PROLOG : content[current];
     $('title').textContent = chapter.title;
+    $('subtitle').textContent = chapter.subtitle || '';
+    $('subtitle').hidden = !chapter.subtitle;
+    $('waiting-title').textContent = chapter.waitingTitle || '';
+    $('waiting-text').textContent = chapter.waitingText || '';
     $('number').textContent = current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
     $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
     $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map(text => { const p = document.createElement('p'); p.textContent = text; return p; }));
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
-    if(current === content.length-1) $('prose').after(figure);
-    else $('prose').before(figure);
+    $('number').before(figure);
     $('waiting').hidden = current !== unlocked || current === content.length-1;
     document.querySelector('.book').classList.toggle('final-chapter', current === content.length - 1);
     $('key-reveal').hidden = true;
@@ -80,7 +83,7 @@
     event.preventDefault();
     if (busy || current !== unlocked || current >= config.KEYS.length) return;
     if (normalize($('key').value) !== normalize(config.KEYS[current])) {
-      $('feedback').textContent = 'Кажется, это ещё не тот ключ. Попробуй присмотреться внимательнее';
+      $('feedback').textContent = 'Кажется, эта страница пока хранит свою тайну. Попробуй ещё раз';
       return;
     }
     unlocked += 1; current = unlocked;
