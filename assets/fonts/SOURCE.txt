@@ -1,0 +1,3 @@
+Vertograd (Unicode edition). Source: https://github.com/slavonic/Vertograd
+Downloaded unmodified fonts/webfonts/Vertograd-Regular.woff2 from main.
+License: SIL OFL 1.1; see OFL.txt. Used only for paragraph-initial drop caps.
