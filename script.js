@@ -91,6 +91,7 @@
     if (persist && opened) { lastPage = current; save(); }
     const chapter = letterOpen ? interlude : current === -1 ? window.STORY_PROLOG : content[current];
     $('chapter').classList.toggle('interlude-page', letterOpen);
+    $('chapter').classList.toggle('prologue-page', current === -1 && !letterOpen);
     $('letter-continue').hidden = !letterOpen;
     $('title').textContent = chapter.title;
     $('key-jump').hidden = letterOpen || current < 0 || current === content.length - 1;
@@ -137,7 +138,7 @@
     $('key').value = ''; $('feedback').textContent = '';
     $('previous').hidden = letterOpen || current === -1;
     $('next').hidden = letterOpen || (current >= unlocked && !(current === 1 && letterPending));
-    $('next').textContent = current === 1 && letterPending ? 'Послание господина Б. →' : current === -1 ? 'Перевернуть страницу →' : 'Следующая глава →';
+    $('next').textContent = current === 1 && letterPending ? 'Послание господина Б. →' : current === -1 ? 'Перелистнуть страницу' : 'Следующая глава →';
     $('chapter').classList.remove('success');
     const url = config.TELEGRAM_URL;
     const valid = /^https:\/\/t\.me\/[A-Za-z0-9_+/-]+(?:\?[^\s]*)?$/.test(url);

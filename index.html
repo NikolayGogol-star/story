@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#30151C">
   <title>ВСЯ МОЯ ЖИЗНЬ</title>
   <link rel="preload" href="./assets/fonts/Vertograd-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="./style.css?v=20261017-letter23">
+  <link rel="stylesheet" href="./style.css?v=20261017-details25">
   <script defer src="./config.js?v=20261017-key17"></script>
   <script defer src="./content.js?v=20261017-finale20"></script>
-  <script defer src="./script.js?v=20261017-letter23"></script>
+  <script defer src="./script.js?v=20261017-details25"></script>
 </head>
 <body>
   <audio id="opening-sound" src="./assets/book-opening.mp3" preload="auto"></audio>
@@ -51,8 +51,7 @@
       <section id="waiting" class="waiting" hidden><h3 id="waiting-title">Продолжение следует…</h3><p id="waiting-text">Некоторые страницы этой истории<br>открываются только в своё время.</p></section>
       <form id="key-form" novalidate>
         <label for="key">Ключ к следующей главе</label>
-        <p class="form-note">Впиши слова, которые привели тебя сюда.</p>
-        <div class="input-row"><input id="key" name="key" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" aria-describedby="feedback"><button type="submit">Открыть страницу <span aria-hidden="true">→</span></button></div>
+        <div class="input-row"><input id="key" name="key" type="text" placeholder="Впиши слова, которые привели тебя сюда." autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" aria-describedby="feedback"><button type="submit">Открыть страницу <span aria-hidden="true">→</span></button></div>
       </form>
       <div id="key-reveal" hidden role="status" class="key-reveal"><svg width="130" height="62" viewBox="0 0 120 55" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="25" cy="25" r="15"/><circle cx="25" cy="25" r="8"/><path d="M40 25H100V39H90V32H80V25M44 21V29"/></g></svg><span id="key-message">Ключ найден</span></div>
       <p id="feedback" role="status" aria-live="polite"></p>

@@ -97,3 +97,16 @@ article{position:relative}
 .interlude-page #prose .author-signature{margin-top:35px}
 #letter-continue{margin:0 auto 15px;display:flex;border-color:var(--gold);font-family:inherit}
 @media(max-width:560px){#chapter.interlude-page{padding:22px 15px;margin:20px -8px}.interlude-page #prose{font-size:18px}.interlude-page #title{font-size:30px}#letter-continue{width:100%;font-size:17px}}
+
+/* Центрированная кнопка пролога, поля и орнаментальные рамки */
+.prologue-page .page-navigation{justify-content:center}
+.prologue-page .page-navigation #next{padding:14px 24px;min-height:52px;background:var(--wine);color:var(--paper);border:1px solid var(--gold);font-size:17px;line-height:1.5}
+.prologue-page .page-navigation #next:hover{background:var(--dark);text-decoration:none}
+#key-form .input-row{display:grid;grid-template-columns:minmax(0,1fr);border-top:0;padding-top:18px;gap:14px}
+#key-form #key{border:1px solid var(--gold);padding:15px 17px;background:#fffaf044;min-height:58px}
+#key::placeholder{color:#79684f;opacity:1;font-style:italic;font-size:clamp(12px,2.9vw,16px)}
+#key-form .input-row button{justify-self:center;width:auto;min-width:210px;border-color:var(--gold)}
+#illustration-frame{border:26px solid var(--gold);border-image-source:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20360%20360%22%20fill%3D%22none%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%22354%22%20height%3D%22354%22%20rx%3D%224%22%20stroke%3D%22%23b69a62%22%20stroke-width%3D%223%22%2F%3E%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22332%22%20height%3D%22332%22%20stroke%3D%22%23d8bd80%22%20stroke-width%3D%221.5%22%2F%3E%3Cdefs%3E%3Cg%20id%3D%22corner%22%20stroke%3D%22%23d8bd80%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M8%2065C8%2033%2020%2011%2060%208M15%2057C18%2027%2030%2020%2056%2015M12%2046C36%2048%2051%2032%2048%2012M21%2040C24%2026%2035%2022%2043%2024C38%2032%2030%2035%2021%2040Z%22%20fill%3D%22%23b69a62%22%2F%3E%3Cpath%20d%3D%22M10%2027C22%2030%2029%2020%2025%2010C20%2015%2015%2020%2010%2027Z%22%20fill%3D%22%23b69a62%22%2F%3E%3Cpath%20d%3D%22M31%2048C42%2056%2053%2047%2048%2039C44%2033%2037%2038%2041%2042M45%2016C57%2025%2060%2037%2054%2045%22%2F%3E%3Cpath%20d%3D%22M7%207L18%209L9%2018Z%22%20fill%3D%22%23ead39c%22%2F%3E%3C%2Fg%3E%3C%2Fdefs%3E%3Cuse%20href%3D%22%23corner%22%2F%3E%3Cuse%20href%3D%22%23corner%22%20transform%3D%22translate%28360%200%29%20scale%28-1%201%29%22%2F%3E%3Cuse%20href%3D%22%23corner%22%20transform%3D%22translate%280%20360%29%20scale%281%20-1%29%22%2F%3E%3Cuse%20href%3D%22%23corner%22%20transform%3D%22translate%28360%20360%29%20scale%28-1%20-1%29%22%2F%3E%3C%2Fsvg%3E");border-image-slice:64;border-image-repeat:stretch;padding:5px;background:#401820;box-shadow:0 5px 20px #30151c25}
+@media(max-width:560px){#illustration-frame{border-width:21px;padding:3px;margin-left:-12px;margin-right:-12px}.prologue-page .page-navigation #next{font-size:16px;padding:14px 18px}#key-form #key{padding:14px 10px}}
+
+@media(max-width:350px){#key::placeholder{font-size:11px}#key-form #key{padding-left:6px;padding-right:6px}}
