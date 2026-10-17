@@ -43,14 +43,16 @@
     $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
     $('feedback').after($('ending'));
-    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { if(text === '[Встретиться с Автором]') return $('ending'); const p = document.createElement('p'); if((chapter.signatureParagraphs || []).includes(index)) p.classList.add('author-signature'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
+    $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { if(text === '[Встретиться с Автором]') return $('ending'); const p = document.createElement('p'); if((chapter.signatureParagraphs || []).includes(index) || text.startsWith('С неизменным почтением')) p.classList.add('author-signature'); if(text === '⸻') p.classList.add('section-break'); if(text === 'Из личных записок господина Б.' || text === 'Записка неизвестного Автора') p.classList.add('memoir-heading'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
     $('number').before(figure);
     $('waiting').hidden = current < 0 || current === content.length-1;
     document.querySelector('.book').classList.toggle('final-chapter', current === content.length - 1);
     $('key-reveal').hidden = true;
-    $('key-form').classList.remove('key-departing');
+    $('key-form').classList.remove('key-departing','key-invalid','key-confirmed');
+    $('chapter').classList.remove('chapter-turn','chapter-enter');
+    $('key-reveal').classList.remove('key-turn');
     if (chapter.illustration) { $('illustration').src = chapter.illustration; $('illustration').alt = chapter.illustrationAlt || ''; }
     else $('illustration').removeAttribute('src');
     const prologueButton = document.createElement('button');
@@ -81,6 +83,7 @@
     $('chapter').style.animation = 'none';
     void $('chapter').offsetWidth;
     $('chapter').style.animation = '';
+    $('chapter').classList.add('chapter-enter');
     if (focus) {
       $('chapter').focus({ preventScroll: true });
       $('chapter').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
@@ -89,26 +92,50 @@
   $('key-form').addEventListener('submit', async event => {
     event.preventDefault();
     if (busy || current < 0 || current >= config.KEYS.length) return;
+    const form = $('key-form');
     if (normalize($('key').value) !== normalize(config.KEYS[current])) {
+      form.classList.remove('key-invalid');
+      void form.offsetWidth;
+      form.classList.add('key-invalid');
       $('feedback').textContent = 'Кажется, эта страница пока хранит свою тайну. Попробуй ещё раз';
       return;
     }
-    current += 1; unlocked = Math.max(unlocked, current);
-    complete = unlocked === content.length - 1;
-    save();
     busy = true;
-    $('key-form').classList.add('key-departing');
+    form.setAttribute('aria-busy','true');
     $('key').blur();
+    $('key').disabled = true;
+    form.querySelector('button').disabled = true;
+    form.classList.remove('key-invalid');
+    form.classList.add('key-confirmed');
     $('feedback').textContent = '';
-    await pause(250);
-    $('key-form').hidden = true;
-    $('key-reveal').hidden = false;
-    $('key-message').textContent = 'Ключ найден';
-    await pause(650);
-    $('key-message').textContent = 'Следующая глава открыта';
-    await pause(700);
-    render(true); $('chapter').classList.add('success');
-    busy = false;
+    const nextPage = current+1;
+    try {
+      await pause(300);
+      form.classList.add('key-departing');
+      await pause(100);
+      form.hidden = true;
+      $('key-reveal').hidden = false;
+      $('key-reveal').classList.add('key-turn');
+      $('key-message').textContent = 'Ключ найден';
+      await pause(500);
+      $('key-message').textContent = 'Следующая глава открыта';
+      await pause(300);
+      $('chapter').classList.remove('chapter-enter');
+      $('chapter').classList.add('chapter-turn');
+      await pause(450);
+      current = nextPage;
+      unlocked = Math.max(unlocked,current);
+      complete = unlocked === content.length-1;
+      render(true);
+      await pause(350);
+    } finally {
+      form.removeAttribute('aria-busy');
+      $('key').disabled = false;
+      form.querySelector('button').disabled = false;
+      form.classList.remove('key-invalid','key-confirmed','key-departing');
+      $('chapter').classList.remove('chapter-turn');
+      busy = false;
+    }
   });
   $('previous').addEventListener('click', () => { if (!busy && current > -1) { current--; render(true); } });
   $('next').addEventListener('click', async () => {
