@@ -35,7 +35,7 @@
     try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current, lastPage, hintStage, firstChapterMistakes })); } catch (_) { /* Keep in-memory progress. */ }
   }
   function renderHints() {
-    $('chapter-hints').hidden = current !== 0;
+    $('chapter-hints').hidden = current !== 0 || (firstChapterMistakes < 3 && hintStage === 0);
     $('hint-start').setAttribute('aria-expanded', String(hintStage >= 1));
     $('hint-answer').textContent = `«${config.KEYS[0]}»`;
     for (let step = 1; step <= 4; step++) {
@@ -130,7 +130,7 @@
       form.classList.add('key-invalid');
       $('feedback').textContent = 'Кажется, эта страница пока хранит свою тайну. Попробуй ещё раз';
       if (current === 0 && firstChapterMistakes < 3) {
-        firstChapterMistakes++; save();
+        firstChapterMistakes++; save(); renderHints();
         if (firstChapterMistakes === 3 && hintStage === 0) $('hint-start').classList.add('hint-nudge');
       }
       return;
