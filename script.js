@@ -15,6 +15,19 @@
   let busy = false;
   let hintStage = 0;
   let firstChapterMistakes = 0;
+  let letterPending = false, letterRead = false, letterOpen = false;
+  const interlude = {
+    title: 'Небольшая просьба господина Б.',
+    paragraphs: [
+      'Прежде чем Вы продолжите чтение, позволю себе обратиться к Вам с одной просьбой.',
+      'Мой доверенный помощник утверждает, что доставленные Вам цветы произвели должное впечатление.',
+      'Однако я привык доверять не столько чужим словам, сколько неопровержимым свидетельствам.',
+      'Поэтому прошу Вас запечатлеть полученный букет и поделиться фотографией в Instagram.',
+      'Считайте это небольшим вкладом в документальную достоверность моих мемуаров.',
+      'С неизменным почтением,\nГосподин Б.'
+    ],
+    signatureParagraphs: [5]
+  };
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : ms));
   const openingSound = $('opening-sound');
@@ -40,11 +53,14 @@
       complete = saved.complete === true && unlocked === content.length - 1;
       if (Number.isInteger(saved.hintStage)) hintStage = Math.max(0, Math.min(4, saved.hintStage));
       if (Number.isInteger(saved.firstChapterMistakes)) firstChapterMistakes = Math.max(0, Math.min(3, saved.firstChapterMistakes));
+      letterRead = saved.letterRead === true || (saved.letterRead === undefined && unlocked >= 2);
+      letterPending = saved.letterPending === true && !letterRead;
     }
   } catch (_) { /* Reading still works when storage is unavailable. */ }
   current = restoredCurrent !== null ? restoredCurrent : typeof lastPage === 'number' ? lastPage : opened && !prologueRead ? -1 : unlocked;
+  if (letterPending) { current = 1; letterOpen = true; }
   function save() {
-    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current, lastPage, hintStage, firstChapterMistakes })); } catch (_) { /* Keep in-memory progress. */ }
+    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current: letterOpen && letterRead ? 2 : current, lastPage, hintStage, firstChapterMistakes, letterPending, letterRead })); } catch (_) { /* Keep in-memory progress. */ }
   }
   function renderHints() {
     $('chapter-hints').hidden = current !== 0 || (firstChapterMistakes < 3 && hintStage === 0);
@@ -73,22 +89,29 @@
   $('hint-start').addEventListener('animationend', () => $('hint-start').classList.remove('hint-nudge'));
   function render(focus = false, persist = true) {
     if (persist && opened) { lastPage = current; save(); }
-    const chapter = current === -1 ? window.STORY_PROLOG : content[current];
+    const chapter = letterOpen ? interlude : current === -1 ? window.STORY_PROLOG : content[current];
+    $('chapter').classList.toggle('interlude-page', letterOpen);
+    $('letter-continue').hidden = !letterOpen;
     $('title').textContent = chapter.title;
-    $('key-jump').hidden = current < 0 || current === content.length - 1;
+    $('key-jump').hidden = letterOpen || current < 0 || current === content.length - 1;
     $('subtitle').textContent = chapter.subtitle || '';
     $('subtitle').hidden = !chapter.subtitle;
     $('waiting-title').textContent = chapter.waitingTitle || '';
     $('waiting-text').textContent = chapter.waitingText || '';
-    $('number').textContent = current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
-    $('folio').textContent = current === -1 ? 'Пролог' : numerals[current];
+    $('number').textContent = letterOpen ? 'Послание' : current === -1 ? 'Пролог' : `Глава ${numerals[current]}`;
+    $('folio').textContent = letterOpen ? 'II · III' : current === -1 ? 'Пролог' : numerals[current];
     $('progress').textContent = `Открыто ${unlocked + 1} из ${content.length} глав`;
     $('feedback').after($('ending'));
     $('prose').replaceChildren(...(chapter.paragraphs.length ? chapter.paragraphs : ['Полный текст этого раздела будет добавлен.']).map((text, index) => { if(text === '[Встретиться с Автором]') return $('ending'); const p = document.createElement('p'); if((chapter.signatureParagraphs || []).includes(index) || text.startsWith('С неизменным почтением')) p.classList.add('author-signature'); if(text === '⸻') p.classList.add('section-break'); if(text === 'Из личных записок господина Б.' || text === 'Записка неизвестного Автора') p.classList.add('memoir-heading'); const tag = (chapter.boldParagraphs || []).includes(index) ? 'strong' : (chapter.italicParagraphs || []).includes(index) ? 'em' : null; if(tag) { const span = document.createElement(tag); span.textContent = text; p.append(span); } else p.textContent = text; return p; }));
+    if (letterOpen) {
+      const signature = $('prose').lastElementChild, name = document.createElement('strong');
+      name.textContent = 'Господин Б.';
+      signature.replaceChildren(document.createTextNode('С неизменным почтением,\n'), name);
+    }
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
     $('number').before(figure);
-    $('waiting').hidden = current < 0 || current === content.length-1;
+    $('waiting').hidden = letterOpen || current < 0 || current === content.length-1;
     document.querySelector('.book').classList.toggle('final-chapter', current === content.length - 1);
     $('key-reveal').hidden = true;
     $('key-form').classList.remove('key-departing','key-invalid','key-confirmed');
@@ -104,17 +127,17 @@
       const button = document.createElement('button');
       button.type = 'button'; button.textContent = numerals[index];
       button.setAttribute('aria-label', `Глава ${numerals[index]}: ${entry.title}`);
-      if (index === current) button.setAttribute('aria-current', 'page');
+      if (index === current && !letterOpen) button.setAttribute('aria-current', 'page');
       button.addEventListener('click', () => turnToPage(index));
       return button;
     }));
-    $('key-form').hidden = current < 0 || current === content.length - 1;
+    $('key-form').hidden = letterOpen || current < 0 || current === content.length - 1;
     renderHints();
     $('ending').hidden = current !== content.length - 1;
     $('key').value = ''; $('feedback').textContent = '';
-    $('previous').hidden = current === -1;
-    $('next').hidden = current >= unlocked;
-    $('next').textContent = current === -1 ? 'Перевернуть страницу →' : 'Следующая глава →';
+    $('previous').hidden = letterOpen || current === -1;
+    $('next').hidden = letterOpen || (current >= unlocked && !(current === 1 && letterPending));
+    $('next').textContent = current === 1 && letterPending ? 'Послание господина Б. →' : current === -1 ? 'Перевернуть страницу →' : 'Следующая глава →';
     $('chapter').classList.remove('success');
     const url = config.TELEGRAM_URL;
     const valid = /^https:\/\/t\.me\/[A-Za-z0-9_+/-]+(?:\?[^\s]*)?$/.test(url);
@@ -133,7 +156,7 @@
   }
   $('key-form').addEventListener('submit', async event => {
     event.preventDefault();
-    if (busy || current < 0 || current >= config.KEYS.length) return;
+    if (busy || letterOpen || current < 0 || current >= config.KEYS.length) return;
     const form = $('key-form');
     const enteredKey = current === 0 ? $('key').value.replace(/[«»„“”"‹›‘’']/gu, '') : $('key').value;
     if (normalize(enteredKey) !== normalize(config.KEYS[current])) {
@@ -166,11 +189,16 @@
       $('key-reveal').classList.add('key-turn');
       $('key-message').textContent = 'Ключ найден';
       await pause(500);
-      $('key-message').textContent = 'Следующая глава открыта';
+      $('key-message').textContent = current === 1 && !letterRead && unlocked < 2 ? 'Вам послание от господина Б.' : 'Следующая глава открыта';
       await pause(300);
-      unlocked = Math.max(unlocked,nextPage);
-      complete = unlocked === content.length-1;
-      await animatePageTurn(nextPage);
+      if (current === 1 && !letterRead && unlocked < 2) {
+        letterPending = true; save();
+        await animatePageTurn(current, true);
+      } else {
+        unlocked = Math.max(unlocked,nextPage);
+        complete = unlocked === content.length-1;
+        await animatePageTurn(nextPage);
+      }
     } finally {
       form.removeAttribute('aria-busy');
       $('key').disabled = false;
@@ -180,7 +208,7 @@
       busy = false;
     }
   });
-  async function animatePageTurn(target) {
+  async function animatePageTurn(target, showLetter = false) {
     pageSound.currentTime = 0;
     pageSound.play().catch(() => {});
     const page = $('chapter');
@@ -194,6 +222,7 @@
       await pause(700);
       if (current === -1 && target >= 0) prologueRead = true;
       current = target;
+      letterOpen = showLetter;
       render(false);
       page.scrollIntoView({behavior:'instant',block:'start'});
       page.focus({preventScroll:true});
@@ -206,12 +235,26 @@
     }
   }
   async function turnToPage(target) {
-    if (busy || target === current || target < -1 || target > unlocked) return;
+    if (busy || (target === current && !letterOpen) || target < -1 || target > unlocked) return;
     busy = true;
     try { await animatePageTurn(target); } finally { busy = false; }
   }
   $('previous').addEventListener('click', () => turnToPage(current - 1));
-  $('next').addEventListener('click', () => turnToPage(current + 1));
+  $('next').addEventListener('click', async () => {
+    if (current === 1 && letterPending && !letterOpen && !busy) {
+      busy = true;
+      try { await animatePageTurn(1, true); } finally { busy = false; }
+    } else turnToPage(current + 1);
+  });
+  $('letter-continue').addEventListener('click', async () => {
+    if (busy || !letterOpen) return;
+    busy = true;
+    try {
+      letterRead = true; letterPending = false; unlocked = Math.max(unlocked, 2);
+      save();
+      await animatePageTurn(2);
+    } finally { busy = false; }
+  });
   $('telegram').addEventListener('click', event => { if ($('telegram').getAttribute('aria-disabled') === 'true') event.preventDefault(); });
   async function animateBook() {
     const canvas = $('book-cinema');
