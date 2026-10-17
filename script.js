@@ -17,6 +17,9 @@
   let firstChapterMistakes = 0;
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : ms));
+  const openingSound = $('opening-sound');
+  openingSound.preload = 'auto';
+  openingSound.volume = .5;
   try {
     const saved = JSON.parse(localStorage.getItem(config.STORAGE_KEY));
     if (saved && Number.isInteger(saved.unlocked) && saved.unlocked >= 0 && saved.unlocked < content.length) {
@@ -345,6 +348,8 @@
   $('open-book').addEventListener('click', async () => {
     if (busy) return;
     busy = true; opened = true; save();
+    openingSound.currentTime = 0;
+    openingSound.play().catch(() => {});
     document.body.classList.add('book-is-opening');
     try { if (!reducedMotion()) await animateBook(); } catch (_) { /* Always allow reading if drawing is unavailable. */ } finally { $('book-cinema').hidden = true; document.body.classList.remove('book-is-opening'); }
     $('cover-screen').hidden = true; $('reading-screen').hidden = false;
