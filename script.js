@@ -93,7 +93,8 @@
     event.preventDefault();
     if (busy || current < 0 || current >= config.KEYS.length) return;
     const form = $('key-form');
-    if (normalize($('key').value) !== normalize(config.KEYS[current])) {
+    const enteredKey = current === 0 ? $('key').value.replace(/[«»„“”"‹›‘’']/gu, '') : $('key').value;
+    if (normalize(enteredKey) !== normalize(config.KEYS[current])) {
       form.classList.remove('key-invalid');
       void form.offsetWidth;
       form.classList.add('key-invalid');
