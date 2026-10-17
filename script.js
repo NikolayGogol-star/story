@@ -34,6 +34,7 @@
     if (persist && opened) { lastPage = current; save(); }
     const chapter = current === -1 ? window.STORY_PROLOG : content[current];
     $('title').textContent = chapter.title;
+    $('key-jump').hidden = current < 0 || current === content.length - 1;
     $('subtitle').textContent = chapter.subtitle || '';
     $('subtitle').hidden = !chapter.subtitle;
     $('waiting-title').textContent = chapter.waitingTitle || '';
@@ -46,7 +47,7 @@
     $('illustration-frame').hidden = !chapter.illustration;
     const figure = $('illustration-frame');
     $('number').before(figure);
-    $('waiting').hidden = current !== unlocked || current === content.length-1;
+    $('waiting').hidden = current < 0 || current === content.length-1;
     document.querySelector('.book').classList.toggle('final-chapter', current === content.length - 1);
     $('key-reveal').hidden = true;
     $('key-form').classList.remove('key-departing');
@@ -64,7 +65,7 @@
       button.addEventListener('click', () => { if (!busy) { current = index; render(true); } });
       return button;
     }));
-    $('key-form').hidden = current !== unlocked || current === content.length - 1;
+    $('key-form').hidden = current < 0 || current === content.length - 1;
     $('ending').hidden = current !== content.length - 1;
     $('key').value = ''; $('feedback').textContent = '';
     $('previous').hidden = current === -1;
@@ -87,12 +88,12 @@
   }
   $('key-form').addEventListener('submit', async event => {
     event.preventDefault();
-    if (busy || current !== unlocked || current >= config.KEYS.length) return;
+    if (busy || current < 0 || current >= config.KEYS.length) return;
     if (normalize($('key').value) !== normalize(config.KEYS[current])) {
       $('feedback').textContent = 'Кажется, эта страница пока хранит свою тайну. Попробуй ещё раз';
       return;
     }
-    unlocked += 1; current = unlocked;
+    current += 1; unlocked = Math.max(unlocked, current);
     complete = unlocked === content.length - 1;
     save();
     busy = true;
