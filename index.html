@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#30151C">
   <title>ВСЯ МОЯ ЖИЗНЬ</title>
   <link rel="preload" href="./assets/fonts/Vertograd-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="./style.css?v=20261017-life16">
+  <link rel="stylesheet" href="./style.css?v=20261017-hints18">
   <script defer src="./config.js?v=20261017-key17"></script>
   <script defer src="./content.js?v=20261017-key17"></script>
-  <script defer src="./script.js?v=20261017-key17"></script>
+  <script defer src="./script.js?v=20261017-hints18"></script>
 </head>
 <body>
   <a class="skip" href="#chapter">Перейти к главе</a>
@@ -54,6 +54,30 @@
       </form>
       <div id="key-reveal" hidden role="status" class="key-reveal"><svg width="130" height="62" viewBox="0 0 120 55" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="25" cy="25" r="15"/><circle cx="25" cy="25" r="8"/><path d="M40 25H100V39H90V32H80V25M44 21V29"/></g></svg><span id="key-message">Ключ найден</span></div>
       <p id="feedback" role="status" aria-live="polite"></p>
+      <section id="chapter-hints" class="chapter-hints" aria-label="Записки господина Б." hidden>
+        <button id="hint-start" class="hint-button" type="button" aria-expanded="false" aria-controls="hint-1">Кажется, мне нужна подсказка…</button>
+        <div id="hint-1" class="hint-note" tabindex="-1" hidden>
+          <p>Признаюсь, я рассчитывал на Вашу наблюдательность.</p>
+          <p>Обратите внимание на предмет, который Вы получили. Мой помощник не случайно выбрал для него столь необычное дополнение.</p>
+          <button class="hint-button" type="button" data-hint="2" aria-expanded="false" aria-controls="hint-2">Господин Б., нельзя ли немного конкретнее?</button>
+        </div>
+        <div id="hint-2" class="hint-note" tabindex="-1" hidden>
+          <p>Хорошо, буду откровеннее.</p>
+          <p>Золотая закладка указывает на место, где спрятан ответ.</p>
+          <p>Вам нужны всего четыре слова. И искать их следует в самом начале одной весьма важной фразы.</p>
+          <button class="hint-button" type="button" data-hint="3" aria-expanded="false" aria-controls="hint-3">Боюсь, мне нужна последняя подсказка</button>
+        </div>
+        <div id="hint-3" class="hint-note" tabindex="-1" hidden>
+          <p>Что ж, вынужден признать, что загадки — занятие не для всех.</p>
+          <p>Найдите предложение, которое начинается словами «Это и было…».</p>
+          <p>Четвёртое слово завершит Вашу кодовую фразу.</p>
+          <button class="hint-button" type="button" data-hint="4" aria-expanded="false" aria-controls="hint-4">Показать правильный ответ</button>
+        </div>
+        <div id="hint-4" class="hint-note" tabindex="-1" hidden>
+          <p>Кодовая фраза: <strong id="hint-answer"></strong></p>
+          <button id="hint-fill" class="hint-button" type="button">Ввести кодовую фразу</button>
+        </div>
+      </section>
       <div id="ending" hidden><a id="telegram" class="author-button">Встретиться с Автором <span aria-hidden="true">↗</span></a><p id="telegram-note" class="form-note"></p></div>
       <div class="page-navigation"><button id="previous" type="button">← Предыдущая глава</button><button id="next" type="button">Следующая глава →</button></div>
     </article>

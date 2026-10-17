@@ -13,6 +13,8 @@
   let lastPage = null;
   let restoredCurrent = null;
   let busy = false;
+  let hintStage = 0;
+  let firstChapterMistakes = 0;
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : ms));
   try {
@@ -24,12 +26,39 @@
       if(Number.isInteger(saved.current) && saved.current >= -1 && saved.current <= unlocked) restoredCurrent = saved.current;
       if(saved.lastPage === 'cover' || (Number.isInteger(saved.lastPage) && saved.lastPage >= -1 && saved.lastPage <= unlocked)) lastPage = saved.lastPage;
       complete = saved.complete === true && unlocked === content.length - 1;
+      if (Number.isInteger(saved.hintStage)) hintStage = Math.max(0, Math.min(4, saved.hintStage));
+      if (Number.isInteger(saved.firstChapterMistakes)) firstChapterMistakes = Math.max(0, Math.min(3, saved.firstChapterMistakes));
     }
   } catch (_) { /* Reading still works when storage is unavailable. */ }
   current = restoredCurrent !== null ? restoredCurrent : typeof lastPage === 'number' ? lastPage : opened && !prologueRead ? -1 : unlocked;
   function save() {
-    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current, lastPage })); } catch (_) { /* Keep in-memory progress. */ }
+    try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current, lastPage, hintStage, firstChapterMistakes })); } catch (_) { /* Keep in-memory progress. */ }
   }
+  function renderHints() {
+    $('chapter-hints').hidden = current !== 0;
+    $('hint-start').setAttribute('aria-expanded', String(hintStage >= 1));
+    $('hint-answer').textContent = `«${config.KEYS[0]}»`;
+    for (let step = 1; step <= 4; step++) {
+      $(`hint-${step}`).hidden = hintStage < step;
+      const button = document.querySelector(`[data-hint="${step}"]`);
+      if (button) button.setAttribute('aria-expanded', String(hintStage >= step));
+    }
+  }
+  function revealHint(step) {
+    if (busy || current !== 0 || step !== hintStage + 1) return;
+    hintStage = step; save(); renderHints();
+    const note = $(`hint-${step}`);
+    note.focus({preventScroll:true});
+    note.scrollIntoView({behavior:reducedMotion() ? 'instant' : 'smooth',block:'nearest'});
+  }
+  $('hint-start').addEventListener('click', () => revealHint(1));
+  document.querySelectorAll('[data-hint]').forEach(button => button.addEventListener('click', () => revealHint(Number(button.dataset.hint))));
+  $('hint-fill').addEventListener('click', () => {
+    if (busy || current !== 0 || hintStage !== 4) return;
+    $('key').value = config.KEYS[0];
+    $('key').focus();
+  });
+  $('hint-start').addEventListener('animationend', () => $('hint-start').classList.remove('hint-nudge'));
   function render(focus = false, persist = true) {
     if (persist && opened) { lastPage = current; save(); }
     const chapter = current === -1 ? window.STORY_PROLOG : content[current];
@@ -68,6 +97,7 @@
       return button;
     }));
     $('key-form').hidden = current < 0 || current === content.length - 1;
+    renderHints();
     $('ending').hidden = current !== content.length - 1;
     $('key').value = ''; $('feedback').textContent = '';
     $('previous').hidden = current === -1;
@@ -99,6 +129,10 @@
       void form.offsetWidth;
       form.classList.add('key-invalid');
       $('feedback').textContent = 'Кажется, эта страница пока хранит свою тайну. Попробуй ещё раз';
+      if (current === 0 && firstChapterMistakes < 3) {
+        firstChapterMistakes++; save();
+        if (firstChapterMistakes === 3 && hintStage === 0) $('hint-start').classList.add('hint-nudge');
+      }
       return;
     }
     busy = true;
