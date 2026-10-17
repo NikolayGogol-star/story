@@ -592,7 +592,9 @@ window.STORY_CONTENT = [
     "illustrationAlt": "Аня с книгой у окна; на подоконнике фотография друзей",
     "waitingTitle": "",
     "waitingText": "",
-    "italicParagraphs": [],
+    "italicParagraphs": [
+      108
+    ],
     "boldParagraphs": []
   }
 ];
