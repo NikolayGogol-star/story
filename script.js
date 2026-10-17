@@ -58,13 +58,13 @@
     const prologueButton = document.createElement('button');
     prologueButton.type='button';prologueButton.textContent='П';prologueButton.setAttribute('aria-label','Пролог');
     if(current === -1) prologueButton.setAttribute('aria-current','page');
-    prologueButton.addEventListener('click',()=>{if(!busy){current=-1;render(true);}});
+    prologueButton.addEventListener('click',()=>turnToPage(-1));
     $('chapters').replaceChildren(prologueButton, ...content.slice(0, unlocked + 1).map((entry, index) => {
       const button = document.createElement('button');
       button.type = 'button'; button.textContent = numerals[index];
       button.setAttribute('aria-label', `Глава ${numerals[index]}: ${entry.title}`);
       if (index === current) button.setAttribute('aria-current', 'page');
-      button.addEventListener('click', () => { if (!busy) { current = index; render(true); } });
+      button.addEventListener('click', () => turnToPage(index));
       return button;
     }));
     $('key-form').hidden = current < 0 || current === content.length - 1;
@@ -120,14 +120,9 @@
       await pause(500);
       $('key-message').textContent = 'Следующая глава открыта';
       await pause(300);
-      $('chapter').classList.remove('chapter-enter');
-      $('chapter').classList.add('chapter-turn');
-      await pause(450);
-      current = nextPage;
-      unlocked = Math.max(unlocked,current);
+      unlocked = Math.max(unlocked,nextPage);
       complete = unlocked === content.length-1;
-      render(true);
-      await pause(350);
+      await animatePageTurn(nextPage);
     } finally {
       form.removeAttribute('aria-busy');
       $('key').disabled = false;
@@ -137,23 +132,36 @@
       busy = false;
     }
   });
-  $('previous').addEventListener('click', () => { if (!busy && current > -1) { current--; render(true); } });
-  $('next').addEventListener('click', async () => {
-    if (busy || current >= unlocked) return;
-    if (current === -1) {
-      busy = true;
-      const page = $('chapter');
-      page.classList.add('prologue-turn');
-      await pause(800);
-      prologueRead = true; save(); current = 0;
-      page.classList.remove('prologue-turn');
-      render(true);
-      page.classList.add('chapter-arrival');
-      await pause(500);
-      page.classList.remove('chapter-arrival');
-      busy = false;
-    } else { current++; render(true); }
-  });
+  async function animatePageTurn(target) {
+    const page = $('chapter');
+    const backward = target < current;
+    const originY = Math.max(0, Math.min(page.offsetHeight, innerHeight / 2 - page.getBoundingClientRect().top));
+    page.style.transformOrigin = `${backward ? 'right' : 'left'} ${originY}px`;
+    page.classList.remove('chapter-enter');
+    page.classList.toggle('turn-backward', backward);
+    page.classList.add('chapter-turn');
+    try {
+      await pause(700);
+      if (current === -1 && target >= 0) prologueRead = true;
+      current = target;
+      render(false);
+      page.scrollIntoView({behavior:'instant',block:'start'});
+      page.focus({preventScroll:true});
+      page.style.transformOrigin = `${backward ? 'left' : 'right'} ${innerHeight / 2}px`;
+      page.classList.add('page-arrival');
+      await pause(550);
+    } finally {
+      page.classList.remove('chapter-turn','turn-backward','page-arrival');
+      page.style.transformOrigin = '';
+    }
+  }
+  async function turnToPage(target) {
+    if (busy || target === current || target < -1 || target > unlocked) return;
+    busy = true;
+    try { await animatePageTurn(target); } finally { busy = false; }
+  }
+  $('previous').addEventListener('click', () => turnToPage(current - 1));
+  $('next').addEventListener('click', () => turnToPage(current + 1));
   $('telegram').addEventListener('click', event => { if ($('telegram').getAttribute('aria-disabled') === 'true') event.preventDefault(); });
   async function animateBook() {
     const canvas = $('book-cinema');
@@ -180,16 +188,18 @@
     }
     imprint('.cover-edition',['ЛИЧНЫЙ ЭКЗЕМПЛЯР']);
     // Wrap the title using the same available width and font as the HTML cover.
-    const titleStyle=getComputedStyle(document.querySelector('.cover-title'));
-    ink.font=`${parseFloat(titleStyle.fontSize)*factor}px ${titleStyle.fontFamily}`;
-    const titleWidth=document.querySelector('.cover-title').getBoundingClientRect().width*factor;
-    let titleLines=['ИСТОРИЯ,'], line='';
-    for(const word of ['КОТОРОЙ','ЕЩЁ','НЕТ']) {
-      const candidate=line?line+' '+word:word;
-      if(line && ink.measureText(candidate).width>titleWidth){titleLines.push(line);line=word;}else line=candidate;
+    for (const selector of ['.cover-title','.cover-subtitle']) {
+      const element=document.querySelector(selector), style=getComputedStyle(element);
+      ink.font=`${style.fontStyle} ${style.fontWeight} ${parseFloat(style.fontSize)*factor}px ${style.fontFamily}`;
+      const width=element.getBoundingClientRect().width*factor;
+      const lines=[]; let line='';
+      for(const word of element.textContent.trim().split(/\s+/)) {
+        const candidate=line ? line+' '+word : word;
+        if(line && ink.measureText(candidate).width>width){lines.push(line);line=word;}else line=candidate;
+      }
+      if(line) lines.push(line);
+      imprint(selector,lines);
     }
-    titleLines.push(line); imprint('.cover-title',titleLines);
-    imprint('.cover-subtitle',['История в четырёх главах']);
     const buttonRect=$('open-book').getBoundingClientRect();
     ink.fillStyle='#30151c70'; ink.strokeStyle='#b69a62';ink.lineWidth=factor;
     const bx=(buttonRect.left-rect.left)*factor, by=(buttonRect.top-rect.top)*factor;

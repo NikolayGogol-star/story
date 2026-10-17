@@ -64,3 +64,15 @@ article{position:relative}
 @keyframes inkAppear{from{opacity:.2;transform:translateY(3px)}to{opacity:1;transform:none}}
 @media(max-width:560px){#prose p:first-child::first-letter{font-size:3em;padding-right:.1em}#key-form{scroll-margin-bottom:24px}#key-jump{font-size:14px}.chapter-turn{backface-visibility:hidden;-webkit-backface-visibility:hidden}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}#chapter.chapter-turn{transform:none!important;opacity:1!important}}
+
+/* Название мемуаров и перелистывание всех открытых страниц */
+.cover-subtitle{top:31%;line-height:1.4;font-size:clamp(12px,1.5vw,17px)}
+.cover-button{top:42%}
+#chapter.chapter-turn{animation:leafOut .7s cubic-bezier(.45,0,.3,1) forwards;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#chapter.turn-backward{--turn-direction:-1}
+#chapter{--turn-direction:1}
+#chapter.chapter-turn::after{background:linear-gradient(90deg,#39272000,#39272038);animation:paperShade .7s ease both}
+#chapter.page-arrival{animation:leafIn .55s cubic-bezier(.2,.65,.3,1) both}
+@keyframes leafOut{0%{opacity:1;transform:rotateY(0)}65%{opacity:1}100%{opacity:0;transform:rotateY(calc(-85deg * var(--turn-direction)))}}
+@keyframes leafIn{from{opacity:0;transform:rotateY(calc(35deg * var(--turn-direction)))}to{opacity:1;transform:rotateY(0)}}
+@media(prefers-reduced-motion:reduce){#chapter.chapter-turn,#chapter.page-arrival{animation:none!important;transform:none!important}}
