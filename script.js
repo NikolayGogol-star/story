@@ -20,6 +20,15 @@
   const openingSound = $('opening-sound');
   openingSound.preload = 'auto';
   openingSound.volume = .5;
+  const pageSound = $('page-sound');
+  pageSound.volume = .5;
+  function primePageSound() {
+    // Unlock this media element during submission, before the key animation.
+    pageSound.muted = true;
+    pageSound.play().then(() => {
+      pageSound.pause(); pageSound.currentTime = 0; pageSound.muted = false;
+    }).catch(() => { pageSound.muted = false; });
+  }
   try {
     const saved = JSON.parse(localStorage.getItem(config.STORAGE_KEY));
     if (saved && Number.isInteger(saved.unlocked) && saved.unlocked >= 0 && saved.unlocked < content.length) {
@@ -140,6 +149,7 @@
     }
     busy = true;
     form.setAttribute('aria-busy','true');
+    primePageSound();
     $('key').blur();
     $('key').disabled = true;
     form.querySelector('button').disabled = true;
@@ -171,6 +181,8 @@
     }
   });
   async function animatePageTurn(target) {
+    pageSound.currentTime = 0;
+    pageSound.play().catch(() => {});
     const page = $('chapter');
     const backward = target < current;
     const originY = Math.max(0, Math.min(page.offsetHeight, innerHeight / 2 - page.getBoundingClientRect().top));
