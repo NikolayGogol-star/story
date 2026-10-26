@@ -12,7 +12,19 @@ window.FUTURE_LETTER = {
   'С неизменным почтением,','Господин Б.'
  ],signatureParagraphs:[8,9]
 };
-window.createFutureCapsule = ({config,state,persist,isOpen,onOpenChapter}) => {
+window.FUTURE_LETTER_AFTERWORD = {
+ title:'Письмо за пределами последней страницы',
+ paragraphs:[
+  'Дорогая Анютка!',
+  'Мемуары завершены, подарок вручен, а у меня осталось для Вас одно тихое послесловие.',
+  'За эти дни у Вас появилась новая история. Мне хотелось бы, чтобы через год Вы смогли вспомнить не только её события, но и себя — ту, которая читает эти строки сегодня.',
+  'Напишите письмо себе будущей. Расскажите, что сейчас делает Вас счастливой, о чём мечтаете и что хочется сберечь.',
+  'Не ищите особенных слов. Пусть это будет Ваш собственный голос — такой, каким Вы услышите его лишь спустя год.',
+  'Я позабочусь о том, чтобы послание дождалось назначенного часа.',
+  'С неизменным почтением,','Господин Б.'
+ ],signatureParagraphs:[6,7]
+};
+window.createFutureCapsule = ({config,state,persist,isOpen,onOpenChapter,hasFinalChapter=()=>false}) => {
  const $=id=>document.getElementById(id),draftKey=config.STORAGE_KEY+'-capsule-draft';
  let submitting=false,checking=false,timer=null,widget=null,challenge='',loadPromise=null,timeMessage=null;
  const timeNotes={
@@ -78,7 +90,7 @@ window.createFutureCapsule = ({config,state,persist,isOpen,onOpenChapter}) => {
   const sealed=state.future_letter_saved||state.deleted;
   $('capsule-page').hidden=!isOpen();
   if(!isOpen()){clearTimeout(timer);return;}
-  $('capsule-form').hidden=sealed;$('capsule-sealed').hidden=!sealed;$('capsule-locked').hidden=!sealed;
+  $('capsule-form').hidden=sealed;$('capsule-sealed').hidden=!sealed;$('capsule-locked').hidden=!sealed||hasFinalChapter();
   $('prose').hidden=sealed;
   $('capsule-confirm-title').textContent=state.deleted?'Письмо удалено':'Письмо запечатано';
   $('capsule-confirm-text').hidden=state.deleted;

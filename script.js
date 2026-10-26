@@ -69,12 +69,23 @@
   current = restoredCurrent !== null ? restoredCurrent : typeof lastPage === 'number' ? lastPage : opened && !prologueRead ? -1 : unlocked;
   if (letterPending) { current = 1; letterOpen = true; }
   if (capsuleOpen) { current = 2; letterOpen = false; }
+  // A direct invitation also works for readers who finished before the capsule was added.
+  if(config.CAPSULE_ENABLED && new URLSearchParams(location.search).get('letter') === '1' && unlocked >= 2){
+    opened=true;prologueRead=true;current=2;lastPage=2;letterOpen=false;letterPending=false;capsuleOpen=true;
+    capsuleState.future_letter_opened=true;save();
+  }
   function save() {
     try { localStorage.setItem(config.STORAGE_KEY, JSON.stringify({ unlocked, complete, opened, prologueRead, current: letterOpen && letterRead ? 2 : current, lastPage, hintStage, firstChapterMistakes, letterPending, letterRead, capsule:{...capsuleState,pageOpen:capsuleOpen} })); } catch (_) { /* Keep in-memory progress. */ }
   }
   const capsuleFlow = window.createFutureCapsule({config,state:capsuleState,persist:save,
     isOpen:()=>capsuleOpen && !$('reading-screen').hidden,
+    hasFinalChapter:()=>unlocked>=3,
     onOpenChapter:()=>{if(!capsuleState.chapter4_available)return;if(unlocked<3){unlocked=3;complete=true;save();}turnToPage(3);}
+  });
+  $('open-future-letter').addEventListener('click',async()=>{
+    if(busy||!config.CAPSULE_ENABLED)return;
+    capsuleState.future_letter_opened=true;busy=true;
+    try{await animatePageTurn(2,false,true);}finally{busy=false;}
   });
   function renderHints() {
     $('chapter-hints').hidden = current !== 0 || (firstChapterMistakes < 3 && hintStage === 0);
@@ -103,7 +114,7 @@
   $('hint-start').addEventListener('animationend', () => $('hint-start').classList.remove('hint-nudge'));
   function render(focus = false, persist = true) {
     if (persist && opened) { lastPage = current; save(); }
-    const chapter = capsuleOpen ? window.FUTURE_LETTER : letterOpen ? interlude : current === -1 ? window.STORY_PROLOG : content[current];
+    const chapter = capsuleOpen ? (unlocked>=3 ? window.FUTURE_LETTER_AFTERWORD : window.FUTURE_LETTER) : letterOpen ? interlude : current === -1 ? window.STORY_PROLOG : content[current];
     $('prose').hidden=false;
     $('chapter').classList.toggle('interlude-page', letterOpen || capsuleOpen);
     $('chapter').classList.toggle('capsule-book-page', capsuleOpen);
