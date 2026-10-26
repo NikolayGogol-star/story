@@ -6,10 +6,11 @@
   <meta name="theme-color" content="#30151C">
   <title>ВСЯ МОЯ ЖИЗНЬ</title>
   <link rel="preload" href="./assets/fonts/Vertograd-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="./style.css?v=20261017-details25">
-  <script defer src="./config.js?v=20261017-key17"></script>
+  <link rel="stylesheet" href="./style.css?v=20261026-capsule28">
+  <script defer src="./config.js?v=20261026-capsule28"></script>
   <script defer src="./content.js?v=20261017-mail27"></script>
-  <script defer src="./script.js?v=20261017-details25"></script>
+  <script defer src="./capsule.js?v=20261026-capsule28"></script>
+  <script defer src="./script.js?v=20261026-capsule28"></script>
 </head>
 <body>
   <audio id="opening-sound" src="./assets/book-opening.mp3" preload="auto"></audio>
@@ -80,6 +81,43 @@
         </div>
       </section>
       <div id="ending" hidden><a id="telegram" class="author-button">Встретиться с Автором <span aria-hidden="true">↗</span></a><p id="telegram-note" class="form-note"></p></div>
+      <section id="capsule-page" hidden aria-label="Письмо в будущее">
+        <form id="capsule-form">
+          <h3>Моей будущей себе</h3>
+          <p class="capsule-date">Будет доставлено 28 октября 2027 года.</p>
+          <label for="capsule-text">Ваше письмо</label>
+          <textarea id="capsule-text" rows="12" maxlength="30000" required placeholder="Дорогая Аня, если ты читаешь это письмо, значит, прошёл целый год…"></textarea>
+          <label for="capsule-email">Электронная почта</label>
+          <input id="capsule-email" type="email" maxlength="254" autocomplete="email" required aria-describedby="capsule-email-note">
+          <p id="capsule-email-note" class="form-note">Укажите адрес, к которому у Вас сохранится доступ через год.</p>
+          <label class="capsule-check"><input id="capsule-consent" type="checkbox" required><span>Я согласна на хранение моего адреса и текста письма для доставки 28 октября 2027 года, а при задержке — до успешной отправки или моего запроса на удаление. До отправки письмо можно удалить здесь. После отправки данные удаляются из базы в течение 7 дней.</span></label>
+          <label class="capsule-check"><input id="capsule-local" type="checkbox"><span>Сохранять черновик на этом устройстве после закрытия браузера. Если устройство общее, оставьте этот пункт пустым.</span></label>
+          <div id="capsule-verification"></div>
+          <button id="capsule-submit" class="author-button" type="submit">Запечатать и отправить в будущее</button>
+        </form>
+        <p id="capsule-error" role="status" aria-live="polite"></p>
+        <section id="capsule-sealed" hidden>
+          <div class="capsule-envelope" aria-hidden="true"><div class="capsule-sheet"></div><div class="capsule-flap"></div><span class="capsule-wax">Б</span></div>
+          <h3 id="capsule-confirm-title">Письмо запечатано</h3>
+          <div id="capsule-confirm-text">
+            <p>Ваше послание бережно сохранено.</p>
+            <p>28 октября 2027 года оно отправится по указанному адресу.</p>
+            <p>Надеюсь, к тому времени человечество наконец научится не терять важные вещи.</p>
+            <p class="capsule-signature">С неизменным почтением,<br>Господин Б.</p>
+            <p class="capsule-date">Дата доставки: 28 октября 2027 года</p>
+          </div>
+          <button id="capsule-delete" class="hint-button" type="button">Удалить письмо до отправки</button>
+          <div id="capsule-delete-confirm" hidden><p>Удалить сохранённое письмо и адрес? Это действие нельзя отменить.</p><button id="capsule-delete-yes" class="hint-button" type="button">Да, удалить письмо</button><button id="capsule-delete-no" class="hint-button" type="button">Оставить письмо</button></div>
+        </section>
+        <section id="capsule-locked" hidden>
+          <span class="capsule-wax locked-wax" aria-hidden="true">Б</span>
+          <h3>Глава IV</h3><p class="capsule-chapter-name">Имя, которое было известно с самого начала</p>
+          <div id="capsule-lock-text"><p>Последняя глава откроется 28 октября.</p><p>Некоторые истории должны завершаться в совершенно определённый день.</p><p class="capsule-signature">Господин Б.</p></div>
+          <p id="capsule-clock" class="capsule-date" role="status"></p>
+          <button id="capsule-open-chapter" class="author-button" type="button" hidden>Перелистнуть страницу</button>
+          <button id="capsule-refresh" class="hint-button" type="button">Проверить, настало ли время</button>
+        </section>
+      </section>
       <button id="letter-continue" class="author-button" type="button" hidden>Поручение выполнено!</button>
       <div class="page-navigation"><button id="previous" type="button">← Предыдущая глава</button><button id="next" type="button">Следующая глава →</button></div>
     </article>
