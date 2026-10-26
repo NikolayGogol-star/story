@@ -138,6 +138,9 @@ article{position:relative}
 .capsule-time-note h3:focus-visible{outline:1px solid var(--gold);outline-offset:6px}
 #capsule-time-prose .capsule-birthday-greeting{margin:24px 0;color:var(--wine);font-size:1.35em;font-style:italic;text-align:center}
 .capsule-birthday-note{animation-duration:.8s}
+.final-gift{margin:32px 0 12px;padding-top:26px;border-top:1px solid #b69a6280;text-align:left}
+.final-gift p{margin:0 0 18px;line-height:1.75}
+.final-gift #gift-download{display:table;margin:26px auto 12px;max-width:100%;white-space:normal;text-align:center;line-height:1.5;letter-spacing:.05em}
 @media(prefers-reduced-motion:reduce){.capsule-time-note{animation:none}}
 .capsule-envelope{position:relative;isolation:isolate;width:min(100%,360px);max-width:360px;aspect-ratio:1.65;height:auto;margin:48px auto 42px;background:linear-gradient(135deg,#dfcba6,#f1e3c6 48%,#cbb48c);border:1px solid #ac8a52;border-radius:3px 4px 5px 4px;box-shadow:0 2px 2px #fff4d680 inset,0 -2px 3px #73502125 inset,0 16px 25px -15px #45271380,0 5px 10px #513a1f20;perspective:700px;overflow:hidden}
 .capsule-envelope::before{content:"";position:absolute;inset:0;z-index:6;border-radius:inherit;pointer-events:none;opacity:.35;background:repeating-linear-gradient(12deg,#805b2d10 0 1px,transparent 1px 4px),repeating-linear-gradient(98deg,#fdf3d418 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
