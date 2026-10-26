@@ -5,6 +5,6 @@ window.STORY_CONFIG = {
   // Включить после развёртывания Worker и реального теста Gmail. Секретов здесь нет.
   CAPSULE_ENABLED: true,
   CAPSULE_API_URL: 'https://anna-future-letter.pismo681.workers.dev',
-  CAPSULE_TURNSTILE_SITEKEY: '0x4AAAAAAFmnSnn9wk24zrlpK92towA2uAo',
+  CAPSULE_TURNSTILE_SITEKEY: '0x4AAAAAAFmnSngurQBH5D21',
   KEYS: ['Это и было счастье', 'красота в глазах смотрящего', 'взгляни на главную героиню']
 };
