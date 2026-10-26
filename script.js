@@ -74,8 +74,7 @@
   }
   const capsuleFlow = window.createFutureCapsule({config,state:capsuleState,persist:save,
     isOpen:()=>capsuleOpen && !$('reading-screen').hidden,
-    onAvailable:()=>{if(unlocked<3){unlocked=3;complete=true;save();render(false);}},
-    onOpenChapter:()=>turnToPage(3)
+    onOpenChapter:()=>{if(!capsuleState.chapter4_available)return;if(unlocked<3){unlocked=3;complete=true;save();}turnToPage(3);}
   });
   function renderHints() {
     $('chapter-hints').hidden = current !== 0 || (firstChapterMistakes < 3 && hintStage === 0);
@@ -161,7 +160,7 @@
     $('ending').hidden = current !== content.length - 1;
     $('key').value = ''; $('feedback').textContent = '';
     $('previous').hidden = capsuleOpen || letterOpen || current === -1;
-    const resumeCapsule = config.CAPSULE_ENABLED && current === 2 && capsuleState.chapter4_password_accepted && !capsuleState.chapter4_available;
+    const resumeCapsule = config.CAPSULE_ENABLED && current === 2 && capsuleState.chapter4_password_accepted && unlocked < 3;
     $('next').hidden = capsuleOpen || letterOpen || (current >= unlocked && !(current === 1 && letterPending) && !resumeCapsule);
     $('next').textContent = resumeCapsule ? 'Письмо в будущее →' : current === 1 && letterPending ? 'Послание господина Б. →' : current === -1 ? 'Перелистнуть страницу' : 'Следующая глава →';
     $('chapter').classList.remove('success');
@@ -274,7 +273,7 @@
   }
   $('previous').addEventListener('click', () => turnToPage(current - 1));
   $('next').addEventListener('click', async () => {
-    if (config.CAPSULE_ENABLED && current === 2 && capsuleState.chapter4_password_accepted && !capsuleState.chapter4_available && !busy) {
+    if (config.CAPSULE_ENABLED && current === 2 && capsuleState.chapter4_password_accepted && unlocked < 3 && !busy) {
       busy=true;try{await animatePageTurn(2,false,true);}finally{busy=false;}
     } else if (current === 1 && letterPending && !letterOpen && !busy) {
       busy = true;

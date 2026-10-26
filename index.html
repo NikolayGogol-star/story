@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#30151C">
   <title>ВСЯ МОЯ ЖИЗНЬ</title>
   <link rel="preload" href="./assets/fonts/Vertograd-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="./style.css?v=20261026-envelope32">
+  <link rel="stylesheet" href="./style.css?v=20261026-wait33">
   <script defer src="./config.js?v=20261026-capsule31"></script>
   <script defer src="./content.js?v=20261017-mail27"></script>
-  <script defer src="./capsule.js?v=20261026-capsule30"></script>
-  <script defer src="./script.js?v=20261026-capsule28"></script>
+  <script defer src="./capsule.js?v=20261026-wait33"></script>
+  <script defer src="./script.js?v=20261026-wait33"></script>
 </head>
 <body>
   <audio id="opening-sound" src="./assets/book-opening.mp3" preload="auto"></audio>
@@ -111,11 +111,29 @@
         </section>
         <section id="capsule-locked" hidden>
           <span class="capsule-wax locked-wax" aria-hidden="true">Б</span>
-          <h3>Глава IV</h3><p class="capsule-chapter-name">Имя, которое было известно с самого начала</p>
-          <div id="capsule-lock-text"><p>Последняя глава откроется 28 октября.</p><p>Некоторые истории должны завершаться в совершенно определённый день.</p><p class="capsule-signature">Господин Б.</p></div>
-          <p id="capsule-clock" class="capsule-date" role="status"></p>
-          <button id="capsule-open-chapter" class="author-button" type="button" hidden>Перелистнуть страницу</button>
-          <button id="capsule-refresh" class="hint-button" type="button">Проверить, настало ли время</button>
+          <div id="capsule-waiting">
+            <p class="capsule-chapter-number">Глава IV</p>
+            <h3 class="capsule-chapter-name">Имя, которое было известно с самого начала</h3>
+            <div id="capsule-lock-text">
+              <p>Полагаю, теперь у Вас появились весьма убедительные догадки относительно личности автора этих мемуаров.</p>
+              <p>Вы обнаружили главную героиню этой истории и даже доверили мне письмо, которое предстоит хранить целый год.</p>
+              <p>Казалось бы, самое время перевернуть последнюю страницу.</p>
+              <p>Но осталась одна тайна, о которой я до сих пор умалчивал.</p>
+              <p class="capsule-question">Почему эта история вообще появилась на свет?</p>
+              <p>Ответ уже записан. И всё же я не могу открыть его Вам раньше назначенного срока.</p>
+              <p>Видите ли, некоторые истории должны завершаться в совершенно особенный день.</p>
+              <p>И этот день уже совсем близко.</p>
+              <p class="capsule-signature">С неизменным почтением,<br>Господин Б.</p>
+            </div>
+            <p id="capsule-clock" class="capsule-date">Последняя глава станет доступна 28 октября, в 00:00 по Санкт-Петербургу.</p>
+            <button id="capsule-refresh" class="author-button" type="button">Проверить, настал ли час</button>
+          </div>
+          <section id="capsule-time-note" class="capsule-time-note" aria-labelledby="capsule-time-title" hidden>
+            <h3 id="capsule-time-title" tabindex="-1"></h3>
+            <div id="capsule-time-prose"></div>
+            <button id="capsule-wait-back" class="author-button" type="button" hidden>Что ж, придётся подождать</button>
+            <button id="capsule-open-chapter" class="author-button" type="button" hidden>Открыть последнюю главу</button>
+          </section>
         </section>
       </section>
       <button id="letter-continue" class="author-button" type="button" hidden>Поручение выполнено!</button>

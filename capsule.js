@@ -12,9 +12,23 @@ window.FUTURE_LETTER = {
   'С неизменным почтением,','Господин Б.'
  ],signatureParagraphs:[8,9]
 };
-window.createFutureCapsule = ({config,state,persist,isOpen,onAvailable,onOpenChapter}) => {
+window.createFutureCapsule = ({config,state,persist,isOpen,onOpenChapter}) => {
  const $=id=>document.getElementById(id),draftKey=config.STORAGE_KEY+'-capsule-draft';
- let submitting=false,checking=false,timer=null,widget=null,challenge='',loadPromise=null,announced=false;
+ let submitting=false,checking=false,timer=null,widget=null,challenge='',loadPromise=null,timeMessage=null;
+ const timeNotes={
+  early:{title:'Не торопите события!',paragraphs:[
+   'Признаться, я предполагал, что Вы проявите нетерпение.',
+   'Впрочем, будь я на Вашем месте, вероятно, тоже попытался бы заглянуть на последнюю страницу раньше срока.',
+   'Но вынужден Вас разочаровать: назначенный час ещё не настал.',
+   'Прошу набраться терпения. Поверьте, у меня есть весьма веская причина приберечь финал именно для этого дня.'
+  ],signature:'С неизменным почтением,'},
+  ready:{title:'Назначенный час настал',paragraphs:[
+   'Ну что ж, дорогая Аня.',
+   'Сегодня я впервые позволю себе нарушить собственные правила и отбросить излишнюю сдержанность.',
+   'С днём рождения!',
+   'Полагаю, теперь настало время открыть последнюю страницу и наконец рассказать Вам то, ради чего всё это затевалось.'
+  ],signature:'С неизменной преданностью,'}
+ };
  let draftStorageAvailable=true;
  let base='';try{const u=new URL(config.CAPSULE_API_URL);if(u.protocol==='https:'||(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))base=u.href.replace(/\/$/,'');}catch{}
  function saveDraft(){
@@ -37,14 +51,20 @@ window.createFutureCapsule = ({config,state,persist,isOpen,onAvailable,onOpenCha
   if(data.saved===true||data.deleted===true){state.future_letter_saved=data.saved===true;state.deleted=data.deleted===true;state.status=data.status;clearDraft();}
   // Availability is accepted only from an authenticated receipt response, never Date.now().
   if((data.saved||data.deleted)&&data.chapter4Available===true){state.chapter4_available=true;}
-  persist();render();if(state.chapter4_available&&!announced){announced=true;onAvailable();}
+  persist();render();
  }
  function schedule(){clearTimeout(timer);if(isOpen()&&!document.hidden&&base&&(state.future_letter_saved||state.deleted))timer=setTimeout(refresh,60000);}
- async function refresh(){
+ async function refresh(showMessage=false){
   if(checking||submitting||!isOpen()||document.hidden||!state.receiptToken)return;
-  checking=true;try{accept(await api('/receipt',{token:state.receiptToken}));$('capsule-error').textContent='';}
+  checking=true;$('capsule-refresh').disabled=true;$('capsule-locked').setAttribute('aria-busy','true');
+  try{
+   const data=await api('/receipt',{token:state.receiptToken});
+   if(showMessage&&(data.saved||data.deleted))timeMessage=data.chapter4Available===true?'ready':'early';
+   accept(data);$('capsule-error').textContent='';
+   if(showMessage&&timeMessage){$('capsule-time-title').focus({preventScroll:true});$('capsule-locked').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}
+  }
   catch(e){if(e.message!=='not_found')$('capsule-error').textContent='Сейчас не удаётся получить вести. Ваше письмо остаётся на своём месте. Попробуйте немного позже.';}
-  finally{checking=false;schedule();}
+  finally{checking=false;$('capsule-refresh').disabled=false;$('capsule-locked').removeAttribute('aria-busy');schedule();}
  }
  function setupChallenge(){
   if(widget!==null||!config.CAPSULE_TURNSTILE_SITEKEY||state.future_letter_saved||state.deleted)return;
@@ -63,9 +83,16 @@ window.createFutureCapsule = ({config,state,persist,isOpen,onAvailable,onOpenCha
   $('capsule-confirm-title').textContent=state.deleted?'Письмо удалено':'Письмо запечатано';
   $('capsule-confirm-text').hidden=state.deleted;
   $('capsule-delete').hidden=state.deleted||['sending','sent'].includes(state.status);
-  $('capsule-open-chapter').hidden=!state.chapter4_available;
-  $('capsule-lock-text').hidden=state.chapter4_available;
-  $('capsule-clock').textContent=state.chapter4_available?'Последняя глава уже ждёт Вас.':'28 октября 2026 года, 00:00 · Санкт-Петербург';
+  const note=sealed?(timeMessage||(state.chapter4_available?'ready':null)):null;
+  $('capsule-waiting').hidden=!!note;$('capsule-time-note').hidden=!note;
+  $('capsule-wait-back').hidden=note!=='early';$('capsule-open-chapter').hidden=note!=='ready';
+  if(note){
+   const message=timeNotes[note];$('capsule-time-title').textContent=message.title;
+   $('capsule-time-note').classList.toggle('capsule-birthday-note',note==='ready');
+   const paragraphs=message.paragraphs.map(text=>{const p=document.createElement('p');p.textContent=text;if(text==='С днём рождения!')p.className='capsule-birthday-greeting';return p;});
+   const signature=document.createElement('p');signature.className='capsule-signature';signature.append(message.signature,document.createElement('br'),'Господин Б.');
+   $('capsule-time-prose').replaceChildren(...paragraphs,signature);
+  }
   if(!sealed)setupChallenge();schedule();
  }
  $('capsule-text').addEventListener('input',saveDraft);$('capsule-email').addEventListener('input',saveDraft);$('capsule-local').addEventListener('change',saveDraft);
@@ -86,7 +113,8 @@ window.createFutureCapsule = ({config,state,persist,isOpen,onAvailable,onOpenCha
    $('capsule-error').textContent='Не удалось подтвердить сохранение письма. Написанное осталось в поле — попробуйте ещё раз. Повторная попытка не создаст второе письмо.';
   }finally{submitting=false;$('capsule-submit').disabled=false;$('capsule-form').removeAttribute('aria-busy');$('capsule-form').classList.remove('capsule-folding');$('capsule-text').readOnly=false;$('capsule-email').readOnly=false;$('capsule-consent').disabled=false;challenge='';if(widget!==null)window.turnstile.reset(widget);schedule();}
  });
- $('capsule-refresh').addEventListener('click',refresh);
+ $('capsule-refresh').addEventListener('click',()=>refresh(true));
+ $('capsule-wait-back').addEventListener('click',()=>{timeMessage=null;render();$('capsule-refresh').focus({preventScroll:true});});
  $('capsule-open-chapter').addEventListener('click',()=>{if(state.chapter4_available)onOpenChapter();});
  $('capsule-delete').addEventListener('click',()=>{$('capsule-delete-confirm').hidden=false;});
  $('capsule-delete-no').addEventListener('click',()=>{$('capsule-delete-confirm').hidden=true;});
@@ -94,6 +122,6 @@ window.createFutureCapsule = ({config,state,persist,isOpen,onAvailable,onOpenCha
   if(submitting)return;submitting=true;$('capsule-delete-yes').disabled=true;
   try{accept(await api('/delete',{token:state.receiptToken}));$('capsule-delete-confirm').hidden=true;$('capsule-error').textContent='Письмо и адрес удалены из хранилища.';}catch{$('capsule-error').textContent='Удаление пока не подтверждено. Пожалуйста, попробуйте ещё раз; если отправка уже началась, обратитесь к организатору.';}finally{submitting=false;$('capsule-delete-yes').disabled=false;}
  });
- document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else refresh();});window.addEventListener('online',refresh);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else refresh();});window.addEventListener('online',()=>refresh());
  return {render,refresh,suspend(){clearTimeout(timer);},draftStorageAvailable:()=>draftStorageAvailable};
 };

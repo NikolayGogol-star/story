@@ -122,6 +122,23 @@ article{position:relative}
 .capsule-date{font-size:16px;font-style:italic;text-align:center;line-height:1.7;color:#806637}.capsule-signature{text-align:right;font-style:italic;line-height:1.8}
 #capsule-error{font-size:16px;line-height:1.7;color:var(--wine)}
 #capsule-locked{margin:35px 0;padding:25px 18px;border:1px solid var(--gold);text-align:center;background:#b69a620c;line-height:1.8}.capsule-chapter-name{font-size:23px;color:var(--wine)}
+#capsule-locked{margin:28px 0 18px;padding:28px clamp(16px,4vw,34px);background:linear-gradient(135deg,#fff8e545,#d1b47a12);box-shadow:inset 0 0 0 5px #f1e5cb,inset 0 0 0 6px #b69a6233}
+#capsule-locked .locked-wax{margin-bottom:18px}
+#capsule-locked .capsule-chapter-number{margin:0 0 10px;color:#806637;font-size:15px;letter-spacing:.16em;text-transform:uppercase;text-align:center}
+#capsule-locked h3.capsule-chapter-name{margin:0 auto 24px;max-width:28ch;font-size:clamp(24px,4vw,34px);line-height:1.25}
+#capsule-lock-text,#capsule-time-prose{text-align:left;font-size:clamp(17px,2.4vw,20px);line-height:1.7;overflow-wrap:break-word}
+#capsule-lock-text p,#capsule-time-prose p{margin:0 0 16px}
+#capsule-lock-text .capsule-question{margin:22px 0;color:var(--wine);font-style:italic;font-size:1.12em;text-align:center}
+#capsule-locked .capsule-signature{margin:22px 0 18px;text-align:right;font-style:italic}
+#capsule-locked .capsule-date{margin:22px 0 16px;padding-top:18px;border-top:1px solid #b69a6260;line-height:1.6}
+#capsule-locked .author-button{display:table;margin:20px auto 0;max-width:100%;white-space:normal;overflow-wrap:break-word;line-height:1.5;text-align:center;font-size:clamp(16px,2.5vw,20px)}
+.capsule-time-note{animation:inkAppear .45s ease both}
+#capsule-locked .capsule-time-note h3{margin:0 0 24px;font-size:clamp(26px,4vw,34px);line-height:1.3}
+.capsule-time-note h3:focus{outline:none}
+.capsule-time-note h3:focus-visible{outline:1px solid var(--gold);outline-offset:6px}
+#capsule-time-prose .capsule-birthday-greeting{margin:24px 0;color:var(--wine);font-size:1.35em;font-style:italic;text-align:center}
+.capsule-birthday-note{animation-duration:.8s}
+@media(prefers-reduced-motion:reduce){.capsule-time-note{animation:none}}
 .capsule-envelope{position:relative;isolation:isolate;width:min(100%,360px);max-width:360px;aspect-ratio:1.65;height:auto;margin:48px auto 42px;background:linear-gradient(135deg,#dfcba6,#f1e3c6 48%,#cbb48c);border:1px solid #ac8a52;border-radius:3px 4px 5px 4px;box-shadow:0 2px 2px #fff4d680 inset,0 -2px 3px #73502125 inset,0 16px 25px -15px #45271380,0 5px 10px #513a1f20;perspective:700px;overflow:hidden}
 .capsule-envelope::before{content:"";position:absolute;inset:0;z-index:6;border-radius:inherit;pointer-events:none;opacity:.35;background:repeating-linear-gradient(12deg,#805b2d10 0 1px,transparent 1px 4px),repeating-linear-gradient(98deg,#fdf3d418 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
 .capsule-envelope::after{content:"";position:absolute;inset:5px;z-index:6;border:1px solid #b3976340;border-radius:2px;pointer-events:none}
